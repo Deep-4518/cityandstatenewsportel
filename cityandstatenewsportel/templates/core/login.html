@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In | The Daily Portal Member Access{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 style="font-family: var(--font-serif); font-size: 2.5rem; text-align: center; margin-bottom: 2rem;">Member Login
+    </h2>
+    <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Secure access to your personalized
+        newsroom.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 1.5rem;">
+            <label style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Email
+                Address</label>
+            {{ form.email }}
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+            <label style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Security
+                Password</label>
+            {{ form.password }}
+        </div>
+        <button type="submit">Unlock Access</button>
+    </form>
+
+    <div
+        style="margin-top: 2rem; text-align: center; font-size: 0.9rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+        New to the portal? <a href="{% url 'signup' %}"
+            style="color: var(--accent); font-weight: 700; text-decoration: none;">Join Now</a>
+    </div>
+</div>
+{% endblock %}

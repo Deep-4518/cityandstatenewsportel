@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}My Intelligence Feed | The Daily Portal{% endblock %}
+
+{% block content %}
+<section style="margin-bottom: 4rem;">
+    <span class="category-tag">Member Premium</span>
+    <h1 style="font-size: 3.5rem; margin-top: 0.5rem;">Welcome Back, {{ request.user.first_name }}</h1>
+    <p style="font-size: 1.25rem; color: var(--text-muted); max-width: 800px;">Your curated selection of the most
+        important stories across the city and the state, organized for authoritative insight.</p>
+</section>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 4rem;">
+    <div>
+        <h3 class="section-title">Your Curated Feed</h3>
+        <div class="news-grid" style="grid-template-columns: 1fr;">
+            <div class="news-card" style="display: flex; height: 200px;">
+                <div class="card-img" style="width: 300px; height: 100%;">
+                    <div class="card-img-placeholder"></div>
+                </div>
+                <div class="card-body" style="flex: 1;">
+                    <div class="card-meta">Economics • Premium Analysis</div>
+                    <h3 class="card-title" style="font-size: 1.5rem;">Deep Dive: The Fiscal Resilience of Our State in
+                        2026</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">How prudent management
+                        is yielding dividends for local infrastructure developments.</p>
+                </div>
+            </div>
+            <div class="news-card" style="display: flex; height: 200px; margin-top: 2rem;">
+                <div class="card-img" style="width: 300px; height: 100%;">
+                    <div class="card-img-placeholder"></div>
+                </div>
+                <div class="card-body" style="flex: 1;">
+                    <div class="card-meta">Sustainability • Exclusive</div>
+                    <h3 class="card-title" style="font-size: 1.5rem;">Green Horizons: The Expansion of Municipal Solar
+                        Grids</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">Exploring the massive
+                        shift towards self-sustaining city power architectures.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <aside>
+        <h3 style="font-family: var(--font-serif); margin-bottom: 1.5rem;">Subscription Benefits</h3>
+        <div
+            style="background: var(--bg-card); border-left: 4px solid var(--accent); padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border);">
+            <div style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent);">
+                    Exclusive: The Morning Brief</h4>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Delivered every day at 6:00 AM.</p>
+            </div>
+            <div style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Ad-Free Intelligence
+                </h4>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Your experience is completely focused on stories.</p>
+            </div>
+            <div>
+                <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Member Events</h4>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Monthly live discussions with our journalists.</p>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}

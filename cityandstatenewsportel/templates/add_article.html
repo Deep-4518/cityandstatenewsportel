@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% block title %}Add New Article | Admin Dashboard{% endblock %}
+
+{% block content %}
+<!-- Loading Tailwind and FontAwesome just for this page to meet modern UI requirements -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Reset some base styles that might conflict -->
+<style>
+    /* Resetting default base.html constraints for dashboard layout */
+    main {
+        padding: 0 !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+    }
+
+    body {
+        background-color: #f3f4f6;
+    }
+</style>
+
+<div class="min-h-screen flex flex-col md:flex-row bg-slate-50 font-sans text-slate-800">
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-700 md:min-h-screen text-slate-300 flex-shrink-0">
+        <div class="p-6 border-b border-slate-700">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-newspaper text-indigo-400"></i>
+                CMS Platform
+            </h2>
+        </div>
+        <nav class="p-4 space-y-2 text-sm font-medium">
+            <a href="{% url 'owner_dashboard' %}"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fas fa-house w-5 text-center"></i> Dashboard
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg bg-indigo-600 text-white shadow-md transition-colors">
+                <i class="fas fa-pen-to-square w-5 text-center"></i> Add Article
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fas fa-list w-5 text-center"></i> Manage Articles
+            </a>
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fas fa-chart-line w-5 text-center"></i> Analytics
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <!-- Top Header -->
+        <header
+            class="bg-white shadow-sm border-b border-slate-200 px-6 py-4 flex justify-between items-center z-10 sticky top-0">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-slate-500 hover:text-slate-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-xl font-semibold text-slate-800">Add New Article</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <i class="fas fa-bell text-slate-400 hover:text-indigo-600 cursor-pointer text-lg"></i>
+                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                    </span>
+                </div>
+                <div class="flex items-center gap-2 border-l border-slate-200 pl-4">
+                    <div
+                        class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
+                        {{ request.user.first_name|default:"A"|slice:":1" }}
+                    </div>
+                    <span class="text-sm font-medium hidden sm:block">{{ request.user.first_name }}</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Form Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50">
+            <div class="max-w-4xl mx-auto">
+
+                <!-- Form Card -->
+                <div
+                    class="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden">
+                    <div class="bg-indigo-50/50 border-b border-slate-100 px-8 py-5 flex items-center gap-3">
+                        <div class="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                            <i class="fas fa-file-signature text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-800">Article Details</h2>
+                            <p class="text-sm text-slate-500">Publish or draft a new story for the portal</p>
+                        </div>
+                    </div>
+
+                    <form action="#" method="POST" class="p-8 space-y-6">
+                        {% csrf_token %}
+
+                        <!-- Title Field -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Article Title</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                    <i class="fas fa-heading"></i>
+                                </span>
+                                <input type="text" name="title" placeholder="Enter article title" required
+                                    class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-slate-50 hover:bg-white focus:bg-white outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Content Field -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1 flex justify-between">
+                                <span>Article Content</span>
+                                <span class="text-xs text-slate-400 font-normal">Markdown / Rich Text Supported</span>
+                            </label>
+                            <div
+                                class="border border-slate-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-colors group">
+                                <!-- Fake Toolbar for visual realism -->
+                                <div
+                                    class="bg-slate-100 px-3 py-2 border-b border-slate-300 flex gap-2 text-slate-500 text-sm">
+                                    <button type="button" class="px-2 py-1 rounded hover:bg-slate-200"><i
+                                            class="fas fa-bold"></i></button>
+                                    <button type="button" class="px-2 py-1 rounded hover:bg-slate-200"><i
+                                            class="fas fa-italic"></i></button>
+                                    <button type="button" class="px-2 py-1 rounded hover:bg-slate-200"><i
+                                            class="fas fa-link"></i></button>
+                                    <div class="w-px h-5 bg-slate-300 my-auto mx-1"></div>
+                                    <button type="button" class="px-2 py-1 rounded hover:bg-slate-200"><i
+                                            class="fas fa-list-ul"></i></button>
+                                    <button type="button" class="px-2 py-1 rounded hover:bg-slate-200"><i
+                                            class="fas fa-image"></i></button>
+                                </div>
+                                <textarea name="content" rows="10" placeholder="Write full news content here..."
+                                    required
+                                    class="w-full p-4 bg-slate-50 group-hover:bg-white focus:bg-white outline-none resize-y"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- 2-Column Grid for Metadata -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            <!-- Category Field -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                        <i class="fas fa-layer-group"></i>
+                                    </span>
+                                    <select name="category" required
+                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-slate-50 outline-none">
+                                        <option value="" disabled selected>Select category</option>
+                                        <option value="politics">Politics</option>
+                                        <option value="sports">Sports</option>
+                                        <option value="technology">Technology</option>
+                                        <option value="business">Business</option>
+                                        <option value="entertainment">Entertainment</option>
+                                    </select>
+                                    <span
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
+                                        <i class="fas fa-chevron-down text-xs"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Journalist Field -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Journalist</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                        <i class="fas fa-user-pen"></i>
+                                    </span>
+                                    <select name="journalist"
+                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-slate-50 outline-none">
+                                        <option value="" disabled selected>Select journalist</option>
+                                        <option value="1">Admin Author</option>
+                                        <option value="2">John Doe</option>
+                                        <option value="3">Jane Smith</option>
+                                    </select>
+                                    <span
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
+                                        <i class="fas fa-chevron-down text-xs"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- City Field -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">City</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                        <i class="fas fa-city"></i>
+                                    </span>
+                                    <input type="text" name="city" placeholder="Enter city related to news"
+                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 outline-none">
+                                </div>
+                            </div>
+
+                            <!-- State Field -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">State</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                        <i class="fas fa-map-location-dot"></i>
+                                    </span>
+                                    <input type="text" name="state" placeholder="Enter state related to news"
+                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 outline-none">
+                                </div>
+                            </div>
+
+                            <!-- Status Field -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                        <i class="fas fa-battery-half"></i>
+                                    </span>
+                                    <select name="status"
+                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-slate-50 outline-none">
+                                        <option value="pending" selected>Pending</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="rejected">Rejected</option>
+                                    </select>
+                                    <span
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
+                                        <i class="fas fa-chevron-down text-xs"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Published Date Field -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Published Date</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </span>
+                                    <!-- Use padding left 10 to clear modern browser date icons that align left sometimes, standard is pl-10 -->
+                                    <input type="datetime-local" name="published_date"
+                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 outline-none text-slate-700">
+                                </div>
+                            </div>
+
+                            <!-- Views Field -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Views</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                    <input type="number" name="views" value="0" min="0" readonly
+                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed outline-none select-none">
+                                    <span
+                                        class="absolute right-3 top-2 text-xs text-slate-400 bg-white px-1 rounded">Default</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="border-slate-200 my-6">
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+                            <button type="button" onclick="window.location.href='{% url 'owner_dashboard' %}'"
+                                class="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors flex items-center justify-center gap-2 focus:ring-2 focus:ring-slate-200 outline-none">
+                                <i class="fas fa-xmark"></i> Cancel
+                            </button>
+                            <button type="submit" name="action" value="draft"
+                                class="px-5 py-2.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg hover:bg-indigo-100 font-medium transition-colors flex items-center justify-center gap-2 focus:ring-2 focus:ring-indigo-300 outline-none">
+                                <i class="fas fa-floppy-disk"></i> Save as Draft
+                            </button>
+                            <button type="submit" name="action" value="publish"
+                                class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-md hover:shadow-lg font-medium transition-all flex items-center justify-center gap-2 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 outline-none">
+                                <i class="fas fa-check-circle"></i> Publish Article
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
