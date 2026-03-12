@@ -3,22 +3,336 @@
 {% block title %}Sign Up | The Daily Portal Intelligence{% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <h2 style="font-family: var(--font-serif); font-size: 2.5rem; text-align: center; margin-bottom: 2rem;">Join the
-        Daily Portal</h2>
-    <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Authorized access to global and local
-        news intelligence.</p>
+<style>
+    /* Modern Premium Form Design */
+    .premium-form-wrapper {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 40px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    [data-theme="dark"] .premium-form-wrapper {
+        background: #1a1a1a;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .premium-form-wrapper:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+    }
+    
+    [data-theme="dark"] .premium-form-wrapper:hover {
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .form-header h2 {
+        font-family: var(--font-serif, "Georgia", serif);
+        font-size: 2.2rem;
+        color: var(--text-color, #1a1a1a);
+        margin-bottom: 10px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .form-header p {
+        color: var(--text-muted, #666);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-color, #333);
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #fdfdfd;
+        color: #333;
+    }
+
+    [data-theme="dark"] .form-control {
+        background: #2a2a2a;
+        border-color: #444;
+        color: #f1f1f1;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent, #0056b3);
+        box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.1);
+        outline: none;
+        background: #fff;
+    }
+
+    [data-theme="dark"] .form-control:focus {
+        background: #1a1a1a;
+        box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.2);
+    }
+
+    /* Radio button custom styling for gender */
+    .radio-group-container {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .radio-group-container ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        gap: 20px;
+        width: 100%;
+    }
+
+    .radio-group-container li {
+        display: flex;
+        align-items: center;
+        margin: 0;
+    }
+
+    .radio-group-container label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-weight: 500;
+        margin-bottom: 0;
+        font-size: 0.95rem;
+    }
+
+    .radio-group-container input[type="radio"] {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        margin-right: 8px;
+        position: relative;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .radio-group-container input[type="radio"]:checked {
+        border-color: var(--accent, #0056b3);
+    }
+
+    .radio-group-container input[type="radio"]:checked::after {
+        content: '';
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: var(--accent, #0056b3);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .premium-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent, #0056b3);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .premium-btn:hover {
+        background: #004494;
+        transform: translateY(-2px);
+    }
+
+    .premium-btn:active {
+        transform: translateY(0);
+    }
+
+    .form-footer {
+        margin-top: 25px;
+        text-align: center;
+        font-size: 0.95rem;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        padding-top: 20px;
+        color: var(--text-color, #333);
+    }
+
+    [data-theme="dark"] .form-footer {
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .form-footer a {
+        color: var(--accent, #0056b3);
+        font-weight: 700;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .form-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .errorlist {
+        color: #d32f2f;
+        list-style: none;
+        padding-left: 0;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        margin-bottom: 0;
+    }
+    .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        background: none;
+        border: none;
+        color: var(--text-muted, #666);
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: color 0.2s ease, background 0.2s ease;
+    }
+
+    .password-toggle:hover {
+        color: var(--text-color, #333);
+        background: rgba(0,0,0,0.05);
+    }
+
+    [data-theme="dark"] .password-toggle:hover {
+        background: rgba(255,255,255,0.1);
+    }
+</style>
+
+<div class="premium-form-wrapper">
+    <div class="form-header">
+        <h2>Join the Daily Portal</h2>
+        <p>Authorized access to global and local news intelligence.</p>
+    </div>
 
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Start Subscription</button>
+        
+        {% if form.non_field_errors %}
+            <div style="background-color: #fee; padding: 10px; border-radius: 6px; border-left: 4px solid #d32f2f; margin-bottom: 15px;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {% if field.name == 'gender' %}
+                    <div class="radio-group-container">
+                        <ul>
+                            {% for radio in field %}
+                                {% if radio.choice_label != '---------' %}
+                                    <li>{{ radio.tag }} <label for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label></li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% elif field.name == 'role' %}
+                    <!-- We want basic rendering but mapped with form-control style -->
+                    <select name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="form-control" {% if field.field.required %}required{% endif %}>
+                        {% for choice in field.field.choices %}
+                            <option value="{{ choice.0 }}" {% if field.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                        {% endfor %}
+                    </select>
+                {% elif 'password' in field.name %}
+                    <div class="password-wrapper">
+                        <input type="password" 
+                               name="{{ field.html_name }}" 
+                               id="{{ field.id_for_label }}" 
+                               class="form-control" 
+                               placeholder="Enter your {{ field.label|lower }}"
+                               {% if field.field.required %}required{% endif %}
+                               style="padding-right: 40px;">
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('{{ field.id_for_label }}', this)" title="Toggle Password Visibility">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                {% else %}
+                    <!-- Render Standard Fields -->
+                    <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                           name="{{ field.html_name }}" 
+                           id="{{ field.id_for_label }}" 
+                           class="form-control" 
+                           placeholder="Enter your {{ field.label|lower }}"
+                           {% if field.value != None %}value="{{ field.value }}"{% endif %}
+                           {% if field.field.required %}required{% endif %}>
+                {% endif %}
+                
+                {% if field.errors %}
+                    {{ field.errors }}
+                {% endif %}
+                
+                {% if field.help_text %}
+                    <small style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-top: 4px;">{{ field.help_text }}</small>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" class="premium-btn">Start Subscription</button>
     </form>
 
-    <div
-        style="margin-top: 2rem; text-align: center; font-size: 0.9rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
-        Already a member? <a href="{% url 'login' %}"
-            style="color: var(--accent); font-weight: 700; text-decoration: none;">Log In</a>
+    <div class="form-footer">
+        Already a member? <a href="{% url 'login' %}">Log In</a>
     </div>
 </div>
+
+<script>
+    function togglePasswordVisibility(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('.eye-icon');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            // Change to eye-off icon
+            icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+        } else {
+            input.type = 'password';
+            // Change back to eye icon
+            icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+        }
+    }
+</script>
 {% endblock %}

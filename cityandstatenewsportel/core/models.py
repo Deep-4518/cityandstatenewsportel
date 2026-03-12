@@ -46,6 +46,11 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=100,null=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True, null=True)
     mobile = models.CharField(max_length=15, blank=True, null=True)
+    profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    state = models.CharField(max_length=100, blank=True, null=True)
+    preferred_city = models.CharField(max_length=100, blank=True, null=True)
+    preferred_state = models.CharField(max_length=100, blank=True, null=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
 
     USERNAME_FIELD = 'email'

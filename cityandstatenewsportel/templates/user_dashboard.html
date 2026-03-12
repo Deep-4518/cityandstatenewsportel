@@ -1,65 +1,444 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}My Intelligence Feed | The Daily Portal{% endblock %}
 
 {% block content %}
-<section style="margin-bottom: 4rem;">
-    <span class="category-tag">Member Premium</span>
-    <h1 style="font-size: 3.5rem; margin-top: 0.5rem;">Welcome Back, {{ request.user.first_name }}</h1>
-    <p style="font-size: 1.25rem; color: var(--text-muted); max-width: 800px;">Your curated selection of the most
-        important stories across the city and the state, organized for authoritative insight.</p>
-</section>
+<style>
+    .dashboard-header {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border);
+    }
 
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 4rem;">
-    <div>
-        <h3 class="section-title">Your Curated Feed</h3>
-        <div class="news-grid" style="grid-template-columns: 1fr;">
-            <div class="news-card" style="display: flex; height: 200px;">
-                <div class="card-img" style="width: 300px; height: 100%;">
-                    <div class="card-img-placeholder"></div>
-                </div>
-                <div class="card-body" style="flex: 1;">
-                    <div class="card-meta">Economics • Premium Analysis</div>
-                    <h3 class="card-title" style="font-size: 1.5rem;">Deep Dive: The Fiscal Resilience of Our State in
-                        2026</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">How prudent management
-                        is yielding dividends for local infrastructure developments.</p>
-                </div>
+    .welcome-text {
+        font-size: 3rem;
+        font-family: var(--font-serif);
+        margin-top: 0.5rem;
+        color: var(--text-color);
+    }
+
+    .preference-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background: rgba(0, 86, 179, 0.1);
+        color: var(--accent);
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+
+    .section-spacing {
+        margin-bottom: 4rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--text-color);
+        padding-bottom: 0.5rem;
+    }
+
+    .section-header h2 {
+        font-family: var(--font-serif);
+        font-size: 1.8rem;
+        margin: 0;
+    }
+
+    .view-all-link {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .view-all-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Grid Layouts */
+    .news-grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .news-grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
+
+    /* Card Styling */
+    .dashboard-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow);
+    }
+
+    .card-img-wrapper {
+        width: 100%;
+        height: 160px;
+        background: #e0e0e0;
+        position: relative;
+    }
+
+    [data-theme="dark"] .card-img-wrapper {
+        background: #2a2a2a;
+    }
+
+    .card-category {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: var(--accent);
+        color: white;
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .card-content {
+        padding: 1.25rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-meta {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .card-title {
+        font-size: 1.15rem;
+        font-family: var(--font-serif);
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+    }
+
+    .card-title a {
+        color: var(--text-color);
+        text-decoration: none;
+    }
+
+    .card-title a:hover {
+        color: var(--accent);
+    }
+
+    .card-footer-meta {
+        margin-top: auto;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .icon-text {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Horizontal Card for Featured */
+    .horizontal-card {
+        display: flex;
+        height: 220px;
+    }
+
+    .horizontal-card .card-img-wrapper {
+        width: 40%;
+        height: 100%;
+    }
+
+    .horizontal-card .card-content {
+        width: 60%;
+        padding: 1.5rem;
+    }
+
+    .horizontal-card .card-title {
+        font-size: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .horizontal-card {
+            flex-direction: column;
+            height: auto;
+        }
+        .horizontal-card .card-img-wrapper,
+        .horizontal-card .card-content {
+            width: 100%;
+        }
+        .news-grid-2 {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Sidebar Styling */
+    .sidebar-widget {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .widget-title {
+        font-family: var(--font-serif);
+        font-size: 1.25rem;
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        display: inline-block;
+    }
+
+    .trending-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .trending-item {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .trending-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .trending-rank {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--border);
+        min-width: 25px;
+    }
+
+    .trending-title {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.4;
+        margin-bottom: 0.25rem;
+    }
+    
+    .trending-title a {
+        color: var(--text-color);
+        text-decoration: none;
+    }
+
+    .trending-title a:hover {
+        color: var(--accent);
+    }
+</style>
+
+<div class="dashboard-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+        <div>
+            <span class="category-tag">Member Premium</span>
+            <h1 class="welcome-text">Welcome Back, {{ request.user.first_name|default:request.user.email }}</h1>
+            <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 700px; margin-top: 10px;">
+                Your curated feed across the city and the state.
+            </p>
+            
+            <div style="margin-top: 15px;">
+                {% if request.user.city %}
+                    <span class="preference-badge">📍 Location: {{ request.user.city }}</span>
+                {% endif %}
+                {% if request.user.preferred_city %}
+                    <span class="preference-badge">🎯 Following: {{ request.user.preferred_city }}</span>
+                {% endif %}
+                <a href="#" style="font-size: 0.85rem; color: var(--text-muted); text-decoration: underline;">Edit Preferences</a>
             </div>
-            <div class="news-card" style="display: flex; height: 200px; margin-top: 2rem;">
-                <div class="card-img" style="width: 300px; height: 100%;">
-                    <div class="card-img-placeholder"></div>
-                </div>
-                <div class="card-body" style="flex: 1;">
-                    <div class="card-meta">Sustainability • Exclusive</div>
-                    <h3 class="card-title" style="font-size: 1.5rem;">Green Horizons: The Expansion of Municipal Solar
-                        Grids</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">Exploring the massive
-                        shift towards self-sustaining city power architectures.</p>
-                </div>
-            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <a href="#" class="btn-theme" style="padding: 10px 20px; text-decoration: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-color);">
+                🔍 Search News
+            </a>
         </div>
     </div>
+</div>
 
-    <aside>
-        <h3 style="font-family: var(--font-serif); margin-bottom: 1.5rem;">Subscription Benefits</h3>
-        <div
-            style="background: var(--bg-card); border-left: 4px solid var(--accent); padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border);">
-            <div style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
-                <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent);">
-                    Exclusive: The Morning Brief</h4>
-                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Delivered every day at 6:00 AM.</p>
+<div style="display: grid; grid-template-columns: 1fr 350px; gap: 3rem;">
+    <!-- Main Content Area -->
+    <div class="main-feed-area">
+        
+        <!-- Local News Section -->
+        <div class="section-spacing">
+            <div class="section-header">
+                <h2>Local News Insights</h2>
+                <a href="#" class="view-all-link">View all local &rarr;</a>
             </div>
-            <div style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
-                <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Ad-Free Intelligence
-                </h4>
-                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Your experience is completely focused on stories.</p>
-            </div>
-            <div>
-                <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Member Events</h4>
-                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Monthly live discussions with our journalists.</p>
+            
+            <div class="news-grid-2">
+                {% for article in local_news %}
+                    <div class="dashboard-card horizontal-card">
+                        <div class="card-img-wrapper">
+                            <div class="card-category">{{ article.category|default:"Local" }}</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-meta">
+                                <span>{{ article.city|default:"City" }}, {{ article.state|default:"State" }}</span>
+                                <span>{{ article.created_at|date:"M d, Y" }}</span>
+                            </div>
+                            <h3 class="card-title">
+                                <a href="#">{{ article.title }}</a>
+                            </h3>
+                            <div class="card-footer-meta">
+                                <span class="icon-text">👁 {{ article.views_count }} Views</span>
+                                <span class="icon-text">✍️ {{ article.author.first_name|default:article.author.email }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="dashboard-card" style="grid-column: 1 / -1; padding: 2rem; text-align: center; background: rgba(0,0,0,0.02);">
+                        <p style="color: var(--text-muted); margin-bottom: 1rem;">Update your location preferences to see news from your city.</p>
+                        <a href="#" style="color: var(--accent); font-weight: 600; text-decoration: none;">Set Preferences</a>
+                    </div>
+                {% endfor %}
             </div>
         </div>
+
+        <!-- Latest News Section -->
+        <div class="section-spacing">
+            <div class="section-header">
+                <h2>Latest Headlines</h2>
+                <a href="#" class="view-all-link">Browse all news &rarr;</a>
+            </div>
+            
+            <div class="news-grid-4">
+                {% for article in latest_news %}
+                    <div class="dashboard-card">
+                        <div class="card-img-wrapper">
+                            <div class="card-category">{{ article.category|default:"News" }}</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-meta">
+                                <span>{{ article.created_at|timesince }} ago</span>
+                            </div>
+                            <h3 class="card-title">
+                                <a href="#">{{ article.title }}</a>
+                            </h3>
+                            <div class="card-footer-meta">
+                                <span class="icon-text">👁 {{ article.views_count }}</span>
+                                <span class="icon-text">👍 0</span>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                     <p style="color: var(--text-muted);">No new headlines at the moment.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recommended Section -->
+        <div class="section-spacing">
+            <div class="section-header">
+                <h2>Recommended For You</h2>
+            </div>
+            
+            <div class="news-grid-4">
+                {% for article in recommended_news %}
+                    <div class="dashboard-card">
+                        <div class="card-img-wrapper"></div>
+                        <div class="card-content">
+                            <div class="card-meta">
+                                <span>{{ article.category|default:"Analysis" }}</span>
+                            </div>
+                            <h3 class="card-title" style="font-size: 1.05rem;">
+                                <a href="#">{{ article.title }}</a>
+                            </h3>
+                            <div class="card-footer-meta">
+                                <span class="icon-text">⭐ Save</span>
+                                <span class="icon-text">🔗 Share</span>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                     <p style="color: var(--text-muted);">Read more articles to get personalized recommendations.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right Sidebar Area -->
+    <aside class="sidebar-area">
+        
+        <!-- Trending Widget -->
+        <div class="sidebar-widget">
+            <h3 class="widget-title">Trending Now</h3>
+            <ul class="trending-list">
+                {% for article in trending_news %}
+                    <li class="trending-item">
+                        <span class="trending-rank">{{ forloop.counter }}</span>
+                        <div>
+                            <h4 class="trending-title"><a href="#">{{ article.title }}</a></h4>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">{{ article.views_count }} Views • {{ article.city|default:"Global" }}</span>
+                        </div>
+                    </li>
+                {% empty %}
+                     <p style="color: var(--text-muted); font-size: 0.9rem;">Trending data unavailable.</p>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Quick Actions Widget -->
+        <div class="sidebar-widget">
+            <h3 class="widget-title">Quick Links</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="margin-bottom: 15px;">
+                    <a href="#" style="display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: var(--text-color); font-weight: 500; border: 1px solid var(--border); padding: 12px; border-radius: 8px;">
+                        <span>⭐ Saved Articles</span>
+                        <span style="color: var(--text-muted);">&rarr;</span>
+                    </a>
+                </li>
+                <li style="margin-bottom: 15px;">
+                    <a href="#" style="display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: var(--text-color); font-weight: 500; border: 1px solid var(--border); padding: 12px; border-radius: 8px;">
+                        <span>💬 My Comments</span>
+                        <span style="color: var(--text-muted);">&rarr;</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Subscription Status -->
+        <div class="sidebar-widget" style="background: var(--accent); color: white; border: none;">
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; margin-bottom: 10px;">Pro Intelligence</h3>
+            <p style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.9;">Your subscription is active. Enjoy ad-free reading and exclusive municipal insight reports.</p>
+            <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                <span>Status: <strong style="color: #4ade80;">Active</strong></span>
+                <a href="#" style="color: white; text-decoration: underline;">Manage</a>
+            </div>
+        </div>
+
     </aside>
 </div>
 {% endblock %}
