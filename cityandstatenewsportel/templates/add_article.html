@@ -1,24 +1,18 @@
-{% extends 'base.html' %}
-{% block title %}Add New Article | Admin Dashboard{% endblock %}
-
-{% block content %}
-<!-- Loading Tailwind and FontAwesome just for this page to meet modern UI requirements -->
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<!-- Reset some base styles that might conflict -->
-<style>
-    /* Resetting default base.html constraints for dashboard layout */
-    main {
-        padding: 0 !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-    }
-
-    body {
-        background-color: #f3f4f6;
-    }
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Article | CMS Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
 
 <div class="min-h-screen flex flex-col md:flex-row bg-slate-50 font-sans text-slate-800">
     <!-- Sidebar -->
@@ -38,11 +32,11 @@
                 class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-600 text-white shadow-md transition-colors">
                 <i class="fas fa-pen-to-square w-5 text-center"></i> Add Article
             </a>
-            <a href="#"
+            <a href="{% url 'manage_articles' %}"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
                 <i class="fas fa-list w-5 text-center"></i> Manage Articles
             </a>
-            <a href="#"
+            <a href="{% url 'analytics' %}"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
                 <i class="fas fa-chart-line w-5 text-center"></i> Analytics
             </a>
@@ -59,6 +53,9 @@
                     <i class="fas fa-bars text-xl"></i>
                 </button>
                 <h1 class="text-xl font-semibold text-slate-800">Add New Article</h1>
+                <a href="{% url 'home' %}" target="_blank" class="hidden md:flex ml-4 items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 transition-colors">
+                    <i class="fas fa-external-link-alt text-xs"></i> View Live Site
+                </a>
             </div>
             <div class="flex items-center gap-4">
                 <div class="relative">
@@ -283,5 +280,5 @@
             </div>
         </div>
     </main>
-</div>
-{% endblock %}
+</body>
+</html>

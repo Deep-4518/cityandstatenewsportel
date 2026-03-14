@@ -47,3 +47,21 @@ def add_payment(request):
         form = PaymentForm()
     
     return render(request, 'add_payment.html', {'form': form})
+
+def manage_articles(request):
+    articles = Article.objects.all().order_by('-created_at')
+    return render(request, 'manage_articles.html', {'articles': articles})
+
+def analytics(request):
+    total_views = sum(article.views_count for article in Article.objects.all())
+    total_articles = Article.objects.count()
+    avg_views = total_views // total_articles if total_articles > 0 else 0
+    top_articles = Article.objects.order_by('-views_count')[:5]
+    
+    context = {
+        'total_views': total_views,
+        'total_articles': total_articles,
+        'avg_views': avg_views,
+        'top_articles': top_articles,
+    }
+    return render(request, 'analytics.html', context)

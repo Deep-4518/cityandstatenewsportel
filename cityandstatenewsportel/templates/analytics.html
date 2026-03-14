@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics | CMS Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="min-h-screen flex flex-col md:flex-row bg-slate-50 font-sans text-slate-800">
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-700 md:min-h-screen text-slate-300 flex-shrink-0">
+        <div class="p-6 border-b border-slate-700">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-newspaper text-indigo-400"></i>
+                CMS Platform
+            </h2>
+        </div>
+        <nav class="p-4 space-y-2 text-sm font-medium">
+            <a href="{% url 'owner_dashboard' %}"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fas fa-house w-5 text-center"></i> Dashboard
+            </a>
+            <a href="{% url 'add_article' %}"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fas fa-pen-to-square w-5 text-center"></i> Add Article
+            </a>
+            <a href="{% url 'manage_articles' %}"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fas fa-list w-5 text-center"></i> Manage Articles
+            </a>
+            <a href="{% url 'analytics' %}"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-600 text-white shadow-md transition-colors">
+                <i class="fas fa-chart-line w-5 text-center"></i> Analytics
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <!-- Top Header -->
+        <header class="bg-white shadow-sm border-b border-slate-200 px-6 py-4 flex justify-between items-center z-10 sticky top-0">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-slate-500 hover:text-slate-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-xl font-semibold text-slate-800">Performance Analytics</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <i class="fas fa-bell text-slate-400 hover:text-indigo-600 cursor-pointer text-lg"></i>
+                </div>
+                <div class="flex items-center gap-2 border-l border-slate-200 pl-4">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
+                        {{ request.user.first_name|default:"A"|slice:":1" }}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Content Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50">
+            <div class="max-w-6xl mx-auto space-y-6">
+
+                <!-- Metric Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Total Views -->
+                    <div class="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-slate-100 p-6 flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-slate-500 font-medium text-sm">Total Views</h3>
+                                <div class="text-3xl font-bold text-slate-800 mt-1">{{ total_views|default:"0" }}</div>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-eye text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-auto text-sm">
+                            <span class="text-emerald-500 font-medium"><i class="fas fa-arrow-up"></i> 12%</span>
+                            <span class="text-slate-400">vs last period</span>
+                        </div>
+                    </div>
+
+                    <!-- Total Articles -->
+                    <div class="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-slate-100 p-6 flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-slate-500 font-medium text-sm">Published Articles</h3>
+                                <div class="text-3xl font-bold text-slate-800 mt-1">{{ total_articles|default:"0" }}</div>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+                                <i class="fas fa-file-alt text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-auto text-sm">
+                            <span class="text-emerald-500 font-medium"><i class="fas fa-arrow-up"></i> 3</span>
+                            <span class="text-slate-400">new this week</span>
+                        </div>
+                    </div>
+
+                    <!-- Avg Views -->
+                    <div class="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-slate-100 p-6 flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-slate-500 font-medium text-sm">Avg. Views per Article</h3>
+                                <div class="text-3xl font-bold text-slate-800 mt-1">{{ avg_views|default:"0" }}</div>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                                <i class="fas fa-chart-pie text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-auto text-sm">
+                            <span class="text-slate-500 font-medium">Consistent engagement</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Fake Chart Section -->
+                    <div class="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-slate-100 p-6 lg:col-span-2">
+                        <h3 class="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-4 mb-4">Traffic Overview</h3>
+                        <div class="h-64 flex items-end justify-between gap-2 px-2 pb-6 border-b border-l border-slate-200 relative mt-4">
+                            <!-- Y-axis labels -->
+                            <div class="absolute -left-10 top-0 text-xs text-slate-400">10k</div>
+                            <div class="absolute -left-10 top-1/2 text-xs text-slate-400">5k</div>
+                            <!-- Bars -->
+                            <div class="w-full bg-indigo-500 rounded-t-sm opacity-80" style="height: 40%;"></div>
+                            <div class="w-full bg-indigo-500 rounded-t-sm opacity-80" style="height: 65%;"></div>
+                            <div class="w-full bg-indigo-500 rounded-t-sm opacity-80" style="height: 45%;"></div>
+                            <div class="w-full bg-indigo-500 rounded-t-sm opacity-80" style="height: 85%;"></div>
+                            <div class="w-full bg-indigo-500 rounded-t-sm opacity-80" style="height: 70%;"></div>
+                            <div class="w-full bg-indigo-500 rounded-t-sm opacity-80" style="height: 90%;"></div>
+                            <div class="w-full bg-indigo-500 rounded-t-sm opacity-80" style="height: 50%;"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-400 pt-2 px-2">
+                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                        </div>
+                    </div>
+
+                    <!-- Top Performing Articles Table Mini -->
+                    <div class="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-slate-100 p-6">
+                        <h3 class="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-4 mb-4 flex items-center gap-2">
+                            <i class="fas fa-trophy text-amber-500 text-sm"></i> Top Articles
+                        </h3>
+                        <ul class="space-y-4">
+                            {% for top_article in top_articles %}
+                            <li class="flex justify-between items-start border-b border-slate-50 pb-3 last:border-0 last:pb-0">
+                                <div class="pr-2">
+                                    <h4 class="text-sm font-medium text-slate-800 leading-snug">{{ top_article.title|truncatechars:35 }}</h4>
+                                    <span class="text-xs text-slate-400 block mt-1"><i class="fas fa-bookmark text-slate-300"></i> {{ top_article.category|default:"News" }}</span>
+                                </div>
+                                <div class="bg-slate-100 text-indigo-700 font-bold text-xs px-2 py-1 rounded inline-block whitespace-nowrap">
+                                    {{ top_article.views_count }} <i class="fas fa-eye ml-0.5 opacity-50"></i>
+                                </div>
+                            </li>
+                            {% empty %}
+                            <li class="text-slate-500 text-sm italic py-4 text-center">No articles available.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
