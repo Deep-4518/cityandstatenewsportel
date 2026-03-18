@@ -77,3 +77,56 @@ class NewsTip(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Bookmark(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email} bookmarked {self.article.title}"
+
+
+class FakeNewsReport(models.Model):
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Reviewed', 'Reviewed'),
+        ('Removed', 'Removed'),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    reason = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report on {self.article.title}"
+
+
+class AdPayment(models.Model):
+    PAYMENT_METHOD_CHOICES = (
+        ('Card', 'Card'),
+        ('UPI', 'UPI'),
+        ('Netbanking', 'Netbanking'),
+        ('Paytm Wallet', 'Paytm Wallet'),
+        ('PhonePe', 'PhonePe'),
+        ('Google Pay', 'Google Pay'),
+        ('QR Payment', 'QR Payment'),
+        ('Razorpay Gateway', 'Razorpay Gateway'),
+    )
+    PLAN_CHOICES = (
+        ('Basic', 'Basic Plan - ₹500'),
+        ('Standard', 'Standard Plan - ₹2000'),
+        ('Premium', 'Premium Plan - ₹5000'),
+    )
+    advertiser = models.ForeignKey(User, on_delete=models.CASCADE)
+    ad_title = models.CharField(max_length=255)
+    plan = models.CharField(max_length=20, choices=PLAN_CHOICES)
+    payment_method = models.CharField(max_length=30, choices=PAYMENT_METHOD_CHOICES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, default='Completed')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Ad: {self.ad_title} by {self.advertiser.email}"

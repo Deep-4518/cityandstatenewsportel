@@ -313,7 +313,12 @@
                             </h3>
                             <div class="card-footer-meta">
                                 <span class="icon-text">👁 {{ article.views_count }} Views</span>
-                                <span class="icon-text">✍️ {{ article.author.first_name|default:article.author.email }}</span>
+                                <span class="icon-text">
+                                    <a href="{% url 'bookmark_article' article.id %}" style="text-decoration:none; color:inherit;" title="Save Article">⭐</a>
+                                </span>
+                                <span class="icon-text">
+                                    <a href="{% url 'report_fake_news' article.id %}" style="text-decoration:none; color:inherit;" title="Report Fake News">🚩</a>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -348,7 +353,12 @@
                             </h3>
                             <div class="card-footer-meta">
                                 <span class="icon-text">👁 {{ article.views_count }}</span>
-                                <span class="icon-text">👍 0</span>
+                                <span class="icon-text">
+                                    <a href="{% url 'bookmark_article' article.id %}" style="text-decoration:none; color:inherit;" title="Save Article">⭐</a>
+                                </span>
+                                <span class="icon-text">
+                                    <a href="{% url 'report_fake_news' article.id %}" style="text-decoration:none; color:inherit;" title="Report Fake News">🚩</a>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -376,8 +386,12 @@
                                 <a href="#">{{ article.title }}</a>
                             </h3>
                             <div class="card-footer-meta">
-                                <span class="icon-text">⭐ Save</span>
-                                <span class="icon-text">🔗 Share</span>
+                                <span class="icon-text">
+                                    <a href="{% url 'bookmark_article' article.id %}" style="text-decoration:none; color:inherit;" title="Save Article">⭐ Save</a>
+                                </span>
+                                <span class="icon-text">
+                                    <a href="{% url 'report_fake_news' article.id %}" style="text-decoration:none; color:inherit;" title="Report Fake News">🚩 Report</a>
+                                </span>
                             </div>
                         </div>
                     </div>

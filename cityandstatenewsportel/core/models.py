@@ -52,6 +52,8 @@ class User(AbstractUser):
     preferred_city = models.CharField(max_length=100, blank=True, null=True)
     preferred_state = models.CharField(max_length=100, blank=True, null=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
+    dark_mode = models.BooleanField(default=False)
+    language = models.CharField(max_length=20, default='English')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
