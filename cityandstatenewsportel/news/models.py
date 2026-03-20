@@ -104,6 +104,19 @@ class FakeNewsReport(models.Model):
         return f"Report on {self.article.title}"
 
 
+class ReadingHistory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reading_history')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    read_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'article')
+        ordering = ['-read_at']
+
+    def __str__(self):
+        return f"{self.user.email} read {self.article.title}"
+
+
 class AdPayment(models.Model):
     PAYMENT_METHOD_CHOICES = (
         ('Card', 'Card'),

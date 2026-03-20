@@ -1,458 +1,720 @@
 {% extends 'base.html' %}
 {% load static %}
-
-{% block title %}My Intelligence Feed | The Daily Portal{% endblock %}
+{% block title %}Reader Panel | The Daily Portal{% endblock %}
 
 {% block content %}
 <style>
-    .dashboard-header {
-        margin-bottom: 3rem;
-        padding-bottom: 2rem;
-        border-bottom: 1px solid var(--border);
-    }
+/* ===== READER PANEL VARIABLES ===== */
+:root {
+  --rp-accent: #d80000;
+  --rp-accent2: #0056b3;
+  --rp-radius: 12px;
+  --rp-transition: 0.25s cubic-bezier(0.16,1,0.3,1);
+}
 
-    .welcome-text {
-        font-size: 3rem;
-        font-family: var(--font-serif);
-        margin-top: 0.5rem;
-        color: var(--text-color);
-    }
+/* ===== LAYOUT ===== */
+.rp-wrapper { display: grid; grid-template-columns: 1fr 320px; gap: 2.5rem; align-items: start; }
+.rp-main { min-width: 0; }
+.rp-sidebar { position: sticky; top: 90px; }
 
-    .preference-badge {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        background: rgba(0, 86, 179, 0.1);
-        color: var(--accent);
-        margin-right: 10px;
-        margin-bottom: 10px;
-    }
+/* ===== DASHBOARD HEADER ===== */
+.rp-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
+.rp-welcome { font-family: var(--font-serif); font-size: 2.4rem; margin: 0.25rem 0 0.5rem; color: var(--text-main); }
+.rp-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; background: rgba(0,86,179,0.1); color: var(--rp-accent2); margin: 3px 4px 3px 0; }
+[data-theme="dark"] .rp-badge { background: rgba(0,86,179,0.2); }
 
-    .section-spacing {
-        margin-bottom: 4rem;
-    }
+/* ===== STAT CARDS ===== */
+.rp-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 2rem; }
+.rp-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--rp-radius); padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem; transition: transform var(--rp-transition), box-shadow var(--rp-transition); }
+.rp-stat:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.rp-stat-icon { font-size: 2rem; line-height: 1; }
+.rp-stat-val { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+.rp-stat-lbl { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        border-bottom: 2px solid var(--text-color);
-        padding-bottom: 0.5rem;
-    }
+/* ===== SEARCH & FILTER BAR ===== */
+.rp-search-bar { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--rp-radius); padding: 1.25rem 1.5rem; margin-bottom: 2rem; }
+.rp-search-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.rp-search-input { flex: 1; min-width: 200px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 1rem; color: var(--text-main); font-family: var(--font-sans); font-size: 0.95rem; margin: 0; }
+.rp-search-input:focus { outline: none; border-color: var(--rp-accent); box-shadow: 0 0 0 3px rgba(216,0,0,0.1); }
+.rp-filter-select { background: var(--bg-body); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 1rem; color: var(--text-main); font-family: var(--font-sans); font-size: 0.9rem; cursor: pointer; margin: 0; width: auto; }
+.rp-filter-select:focus { outline: none; border-color: var(--rp-accent); }
+.rp-search-btn { background: var(--rp-accent); color: white; border: none; border-radius: 8px; padding: 0.65rem 1.5rem; font-weight: 700; cursor: pointer; font-size: 0.9rem; margin: 0; width: auto; transition: background var(--rp-transition), transform var(--rp-transition); }
+.rp-search-btn:hover { background: #b00000; transform: translateY(-1px); }
 
-    .section-header h2 {
-        font-family: var(--font-serif);
-        font-size: 1.8rem;
-        margin: 0;
-    }
+/* ===== SECTION HEADER ===== */
+.rp-section { margin-bottom: 3rem; }
+.rp-section-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--text-main); }
+.rp-section-hdr h2 { font-family: var(--font-serif); font-size: 1.6rem; margin: 0; }
+.rp-view-all { color: var(--rp-accent); font-weight: 600; font-size: 0.85rem; text-decoration: none; }
+.rp-view-all:hover { text-decoration: underline; }
 
-    .view-all-link {
-        color: var(--accent);
-        font-weight: 600;
-        text-decoration: none;
-        font-size: 0.9rem;
-    }
+/* ===== ARTICLE CARDS ===== */
+.rp-grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 1.5rem; }
+.rp-grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; }
 
-    .view-all-link:hover {
-        text-decoration: underline;
-    }
+/* ===== CARD ===== */
+.rp-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--rp-radius); overflow: hidden; display: flex; flex-direction: column; height: 100%; transition: transform var(--rp-transition), box-shadow var(--rp-transition); }
+.rp-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+.rp-card-img { width: 100%; height: 150px; background: linear-gradient(135deg, #1a1a2e, #16213e); position: relative; overflow: hidden; }
+.rp-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--rp-transition); }
+.rp-card:hover .rp-card-img img { transform: scale(1.07); }
+.rp-card-img-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; opacity: 0.4; }
+.rp-cat-tag { position: absolute; top: 10px; left: 10px; background: var(--rp-accent); color: white; padding: 3px 9px; font-size: 0.7rem; font-weight: 800; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rp-card-body { padding: 1.1rem; flex: 1; display: flex; flex-direction: column; }
+.rp-card-meta { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; justify-content: space-between; }
+.rp-card-title { font-family: var(--font-serif); font-size: 1.05rem; line-height: 1.4; margin-bottom: 0.5rem; }
+.rp-card-title a { color: var(--text-main); text-decoration: none; }
+.rp-card-title a:hover { color: var(--rp-accent); }
+.rp-card-excerpt { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rp-card-footer { margin-top: auto; padding-top: 0.75rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--text-muted); }
+.rp-icon-btn { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 0.78rem; padding: 4px 6px; border-radius: 6px; margin: 0; width: auto; transition: color var(--rp-transition), background var(--rp-transition); }
+.rp-icon-btn:hover { color: var(--rp-accent); background: rgba(216,0,0,0.08); transform: none; }
+.rp-icon-btn.bookmarked { color: #f59e0b; }
+.rp-read-more { display: inline-flex; align-items: center; gap: 4px; color: var(--rp-accent); font-weight: 600; font-size: 0.78rem; text-decoration: none; padding: 4px 6px; border-radius: 6px; transition: background var(--rp-transition); }
+.rp-read-more:hover { background: rgba(216,0,0,0.08); }
 
-    /* Grid Layouts */
-    .news-grid-4 {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 2rem;
-    }
+/* ===== HORIZONTAL CARD ===== */
+.rp-hcard { display: flex; height: 180px; }
+.rp-hcard .rp-card-img { width: 38%; height: 100%; flex-shrink: 0; }
+.rp-hcard .rp-card-body { width: 62%; }
+.rp-hcard .rp-card-title { font-size: 1.1rem; }
 
-    .news-grid-2 {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 2rem;
-    }
+/* ===== SKELETON LOADING ===== */
+.rp-skeleton { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--rp-radius); overflow: hidden; }
+.sk-block { background: linear-gradient(90deg, var(--border) 25%, rgba(200,200,200,0.1) 50%, var(--border) 75%); background-size: 200% 100%; animation: sk-shimmer 1.5s infinite; border-radius: 4px; }
+@keyframes sk-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.sk-img { height: 150px; border-radius: 0; }
+.sk-line { height: 12px; margin: 8px 12px; }
+.sk-line.short { width: 60%; }
 
-    /* Card Styling */
-    .dashboard-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        overflow: hidden;
-        transition: transform 0.2s, box-shadow 0.2s;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
+/* ===== SIDEBAR WIDGETS ===== */
+.rp-widget { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--rp-radius); padding: 1.4rem; margin-bottom: 1.5rem; }
+.rp-widget-title { font-family: var(--font-serif); font-size: 1.1rem; border-bottom: 2px solid var(--rp-accent); padding-bottom: 0.4rem; margin-bottom: 1.1rem; display: inline-block; }
+.rp-quick-link { display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: var(--text-main); font-weight: 500; font-size: 0.9rem; border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; transition: border-color var(--rp-transition), background var(--rp-transition); }
+.rp-quick-link:hover { border-color: var(--rp-accent); background: rgba(216,0,0,0.04); color: var(--rp-accent); }
+.rp-quick-link .badge-count { background: var(--rp-accent); color: white; font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
 
-    .dashboard-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow);
-    }
+/* ===== TRENDING LIST ===== */
+.rp-trending-item { display: flex; gap: 12px; padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+.rp-trending-item:last-child { border-bottom: none; padding-bottom: 0; }
+.rp-trending-rank { font-size: 1.4rem; font-weight: 800; color: var(--border); min-width: 24px; line-height: 1; }
+.rp-trending-title { font-size: 0.9rem; font-weight: 600; line-height: 1.4; margin-bottom: 3px; }
+.rp-trending-title a { color: var(--text-main); text-decoration: none; }
+.rp-trending-title a:hover { color: var(--rp-accent); }
 
-    .card-img-wrapper {
-        width: 100%;
-        height: 160px;
-        background: #e0e0e0;
-        position: relative;
-    }
+/* ===== PRO CARD ===== */
+.rp-pro-card { background: linear-gradient(135deg, #0056b3, #003d82); color: white; border-radius: var(--rp-radius); padding: 1.5rem; margin-bottom: 1.5rem; border: none; }
+.rp-pro-title { font-family: var(--font-serif); font-size: 1.3rem; margin-bottom: 0.75rem; }
+.rp-pro-features { list-style: none; padding: 0; margin: 0 0 1rem; font-size: 0.85rem; }
+.rp-pro-features li { padding: 3px 0; opacity: 0.9; }
+.rp-pro-status { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; }
+.rp-pro-active { color: #4ade80; font-weight: 700; }
+.rp-pro-manage { color: white; text-decoration: underline; font-size: 0.85rem; cursor: pointer; background: none; border: none; padding: 0; margin: 0; width: auto; font-weight: 600; }
+.rp-pro-manage:hover { opacity: 0.8; transform: none; background: none; }
+.rp-progress-bar { background: rgba(255,255,255,0.2); border-radius: 10px; height: 6px; overflow: hidden; margin-top: 0.5rem; }
+.rp-progress-fill { background: #4ade80; height: 100%; border-radius: 10px; width: 68%; transition: width 1s ease; }
+.rp-progress-label { display: flex; justify-content: space-between; font-size: 0.75rem; opacity: 0.8; margin-top: 4px; }
 
-    [data-theme="dark"] .card-img-wrapper {
-        background: #2a2a2a;
-    }
+/* ===== SAVED / HISTORY ITEMS ===== */
+.rp-mini-item { display: flex; gap: 10px; padding: 0.7rem 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.rp-mini-item:last-child { border-bottom: none; }
+.rp-mini-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rp-accent); margin-top: 6px; flex-shrink: 0; }
+.rp-mini-title { font-size: 0.85rem; font-weight: 600; line-height: 1.4; color: var(--text-main); text-decoration: none; }
+.rp-mini-title:hover { color: var(--rp-accent); }
+.rp-mini-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
 
-    .card-category {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: var(--accent);
-        color: white;
-        padding: 4px 10px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        border-radius: 4px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
+/* ===== SEARCH RESULTS ===== */
+#search-results-section { display: none; }
+#search-results-section.active { display: block; }
+.rp-no-results { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 1rem; }
 
-    .card-content {
-        padding: 1.25rem;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
+/* ===== DARK MODE TOGGLE ===== */
+.rp-dark-toggle { display: flex; align-items: center; gap: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--text-main); width: 100%; justify-content: space-between; margin-bottom: 10px; }
+.rp-toggle-switch { width: 40px; height: 22px; background: var(--border); border-radius: 11px; position: relative; transition: background 0.3s; flex-shrink: 0; }
+.rp-toggle-switch::after { content: ''; position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.3s; }
+[data-theme="dark"] .rp-toggle-switch { background: var(--rp-accent2); }
+[data-theme="dark"] .rp-toggle-switch::after { transform: translateX(18px); }
 
-    .card-meta {
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        margin-bottom: 0.5rem;
-        display: flex;
-        justify-content: space-between;
-    }
+/* ===== PREFERENCES MODAL ===== */
+.rp-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9000; align-items: center; justify-content: center; }
+.rp-modal-overlay.open { display: flex; }
+.rp-modal { background: var(--bg-card); border-radius: var(--rp-radius); padding: 2rem; width: 90%; max-width: 440px; border: 1px solid var(--border); }
+.rp-modal h3 { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.25rem; }
+.rp-modal label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: var(--text-muted); }
+.rp-modal input { margin-bottom: 1rem; }
+.rp-modal-actions { display: flex; gap: 10px; margin-top: 1rem; }
+.rp-btn-primary { background: var(--rp-accent); color: white; border: none; border-radius: 8px; padding: 0.65rem 1.5rem; font-weight: 700; cursor: pointer; font-size: 0.9rem; margin: 0; width: auto; transition: background var(--rp-transition); }
+.rp-btn-primary:hover { background: #b00000; transform: none; }
+.rp-btn-secondary { background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 1.5rem; font-weight: 600; cursor: pointer; font-size: 0.9rem; margin: 0; width: auto; transition: border-color var(--rp-transition); }
+.rp-btn-secondary:hover { border-color: var(--rp-accent); transform: none; background: var(--bg-body); }
 
-    .card-title {
-        font-size: 1.15rem;
-        font-family: var(--font-serif);
-        margin-bottom: 0.75rem;
-        line-height: 1.4;
-    }
+/* ===== CONTINUE READING ===== */
+.rp-continue-item { display: flex; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+.rp-continue-item:last-child { border-bottom: none; }
+.rp-continue-thumb { width: 70px; height: 55px; border-radius: 6px; background: linear-gradient(135deg, #1a1a2e, #0f3460); flex-shrink: 0; overflow: hidden; }
+.rp-continue-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.rp-continue-title { font-size: 0.9rem; font-weight: 600; line-height: 1.4; color: var(--text-main); text-decoration: none; }
+.rp-continue-title:hover { color: var(--rp-accent); }
+.rp-continue-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 3px; }
 
-    .card-title a {
-        color: var(--text-color);
-        text-decoration: none;
-    }
-
-    .card-title a:hover {
-        color: var(--accent);
-    }
-
-    .card-footer-meta {
-        margin-top: auto;
-        padding-top: 1rem;
-        border-top: 1px solid var(--border);
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.8rem;
-        color: var(--text-muted);
-    }
-
-    .icon-text {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    /* Horizontal Card for Featured */
-    .horizontal-card {
-        display: flex;
-        height: 220px;
-    }
-
-    .horizontal-card .card-img-wrapper {
-        width: 40%;
-        height: 100%;
-    }
-
-    .horizontal-card .card-content {
-        width: 60%;
-        padding: 1.5rem;
-    }
-
-    .horizontal-card .card-title {
-        font-size: 1.5rem;
-    }
-
-    @media (max-width: 768px) {
-        .horizontal-card {
-            flex-direction: column;
-            height: auto;
-        }
-        .horizontal-card .card-img-wrapper,
-        .horizontal-card .card-content {
-            width: 100%;
-        }
-        .news-grid-2 {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    /* Sidebar Styling */
-    .sidebar-widget {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .widget-title {
-        font-family: var(--font-serif);
-        font-size: 1.25rem;
-        border-bottom: 2px solid var(--accent);
-        padding-bottom: 0.5rem;
-        margin-bottom: 1.5rem;
-        display: inline-block;
-    }
-
-    .trending-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .trending-item {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 1.25rem;
-        padding-bottom: 1.25rem;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .trending-item:last-child {
-        margin-bottom: 0;
-        padding-bottom: 0;
-        border-bottom: none;
-    }
-
-    .trending-rank {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--border);
-        min-width: 25px;
-    }
-
-    .trending-title {
-        font-size: 1rem;
-        font-weight: 600;
-        line-height: 1.4;
-        margin-bottom: 0.25rem;
-    }
-    
-    .trending-title a {
-        color: var(--text-color);
-        text-decoration: none;
-    }
-
-    .trending-title a:hover {
-        color: var(--accent);
-    }
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .rp-wrapper { grid-template-columns: 1fr; }
+  .rp-sidebar { position: static; }
+}
+@media (max-width: 768px) {
+  .rp-stats { grid-template-columns: 1fr 1fr; }
+  .rp-grid-2 { grid-template-columns: 1fr; }
+  .rp-hcard { flex-direction: column; height: auto; }
+  .rp-hcard .rp-card-img { width: 100%; height: 140px; }
+  .rp-welcome { font-size: 1.8rem; }
+  .rp-search-row { flex-direction: column; }
+  .rp-filter-select, .rp-search-btn { width: 100%; }
+}
+@media (max-width: 480px) {
+  .rp-stats { grid-template-columns: 1fr; }
+}
 </style>
 
-<div class="dashboard-header">
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+<!-- ===== PREFERENCES MODAL ===== -->
+<div class="rp-modal-overlay" id="prefModal">
+  <div class="rp-modal">
+    <h3>📍 Change Preferences</h3>
+    <form method="post" action="#">
+      {% csrf_token %}
+      <label>Preferred City</label>
+      <input type="text" name="preferred_city" value="{{ request.user.preferred_city|default:'' }}" placeholder="e.g. Ahmedabad">
+      <label>Preferred State</label>
+      <input type="text" name="preferred_state" value="{{ request.user.preferred_state|default:'' }}" placeholder="e.g. Gujarat">
+      <div class="rp-modal-actions">
+        <button type="submit" class="rp-btn-primary">Save Preferences</button>
+        <button type="button" class="rp-btn-secondary" onclick="document.getElementById('prefModal').classList.remove('open')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD HEADER ===== -->
+<div class="rp-header">
+  <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
+    <div>
+      <span class="category-tag">Member Premium</span>
+      <h1 class="rp-welcome">Welcome Back, {{ request.user.first_name|default:request.user.email }} 👋</h1>
+      <p style="color:var(--text-muted); margin-top:6px; font-size:1rem;">Your personalized news feed — city, state &amp; beyond.</p>
+      <div style="margin-top:10px;">
+        {% if request.user.city %}<span class="rp-badge">📍 {{ request.user.city }}</span>{% endif %}
+        {% if request.user.preferred_city %}<span class="rp-badge">🎯 {{ request.user.preferred_city }}</span>{% endif %}
+        {% if request.user.preferred_state %}<span class="rp-badge">🌍 {{ request.user.preferred_state }}</span>{% endif %}
+        <button onclick="document.getElementById('prefModal').classList.add('open')" style="background:none;border:none;color:var(--rp-accent);font-size:0.82rem;cursor:pointer;text-decoration:underline;padding:0;margin:0;width:auto;">Edit Preferences</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STAT CARDS ===== -->
+<div class="rp-stats">
+  <div class="rp-stat">
+    <div class="rp-stat-icon">📰</div>
+    <div>
+      <div class="rp-stat-val">{{ articles_read_count }}</div>
+      <div class="rp-stat-lbl">Articles Read</div>
+    </div>
+  </div>
+  <div class="rp-stat">
+    <div class="rp-stat-icon">⭐</div>
+    <div>
+      <div class="rp-stat-val">{{ saved_count }}</div>
+      <div class="rp-stat-lbl">Saved Articles</div>
+    </div>
+  </div>
+  <div class="rp-stat">
+    <div class="rp-stat-icon">💬</div>
+    <div>
+      <div class="rp-stat-val">{{ comments_count }}</div>
+      <div class="rp-stat-lbl">Comments Made</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SEARCH & FILTER BAR ===== -->
+<div class="rp-search-bar">
+  <div class="rp-search-row">
+    <input type="text" id="searchInput" class="rp-search-input" placeholder="🔍  Search articles, topics, cities...">
+    <select id="filterCategory" class="rp-filter-select">
+      <option value="">All Categories</option>
+      {% for cat in categories %}
+        <option value="{{ cat }}">{{ cat }}</option>
+      {% endfor %}
+      <option value="Sports">Sports</option>
+      <option value="Tech">Tech</option>
+      <option value="Politics">Politics</option>
+      <option value="Business">Business</option>
+    </select>
+    <select id="filterDate" class="rp-filter-select">
+      <option value="">Any Time</option>
+      <option value="today">Today</option>
+      <option value="week">This Week</option>
+      <option value="month">This Month</option>
+    </select>
+    <input type="text" id="filterCity" class="rp-search-input" style="max-width:160px;" placeholder="City / State">
+    <button class="rp-search-btn" onclick="doSearch()">Search</button>
+    <button class="rp-search-btn" style="background:var(--border);color:var(--text-main);" onclick="clearSearch()">Clear</button>
+  </div>
+</div>
+
+<!-- ===== SEARCH RESULTS (hidden by default) ===== -->
+<div id="search-results-section" class="rp-section">
+  <div class="rp-section-hdr">
+    <h2>🔍 Search Results</h2>
+    <span id="search-count" style="font-size:0.85rem;color:var(--text-muted);"></span>
+  </div>
+  <div id="search-results-grid" class="rp-grid-3">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- ===== MAIN + SIDEBAR WRAPPER ===== -->
+<div class="rp-wrapper">
+<div class="rp-main">
+
+  <!-- ===== LATEST HEADLINES ===== -->
+  <div class="rp-section">
+    <div class="rp-section-hdr">
+      <h2>📰 Latest Headlines</h2>
+      <a href="#" class="rp-view-all">Browse all &rarr;</a>
+    </div>
+    <div class="rp-grid-3" id="latest-grid">
+      {% if latest_news %}
+        {% for article in latest_news %}
+        <div class="rp-card">
+          <div class="rp-card-img">
+            {% with article.media.first as media %}
+              {% if media and media.media_upload %}
+                <img src="{{ media.media_upload.url }}" alt="{{ article.title }}" loading="lazy">
+              {% else %}
+                <div class="rp-card-img-placeholder">📰</div>
+              {% endif %}
+            {% endwith %}
+            <span class="rp-cat-tag">{{ article.category|default:"News" }}</span>
+          </div>
+          <div class="rp-card-body">
+            <div class="rp-card-meta">
+              <span>{{ article.city|default:"" }}{% if article.city and article.state %}, {% endif %}{{ article.state|default:"" }}</span>
+              <span>{{ article.created_at|timesince }} ago</span>
+            </div>
+            <h3 class="rp-card-title"><a href="#">{{ article.title }}</a></h3>
+            <p class="rp-card-excerpt">{{ article.content|truncatechars:110 }}</p>
+            <div class="rp-card-footer">
+              <span style="display:flex;gap:6px;align-items:center;">
+                <span style="font-size:0.78rem;">👁 {{ article.views_count }}</span>
+                <a href="{% url 'bookmark_article' article.id %}" class="rp-icon-btn {% if article.id in bookmarked_ids %}bookmarked{% endif %}" title="{% if article.id in bookmarked_ids %}Remove Bookmark{% else %}Save Article{% endif %}">
+                  {% if article.id in bookmarked_ids %}⭐{% else %}☆{% endif %} Save
+                </a>
+              </span>
+              <a href="#" class="rp-read-more">🔖 Read More</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <!-- Skeleton loading placeholders -->
+        {% for i in "123456" %}
+        <div class="rp-skeleton">
+          <div class="sk-block sk-img"></div>
+          <div class="sk-block sk-line" style="margin-top:12px;"></div>
+          <div class="sk-block sk-line short"></div>
+          <div class="sk-block sk-line" style="margin-bottom:12px;"></div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ===== CITY NEWS ===== -->
+  <div class="rp-section">
+    <div class="rp-section-hdr">
+      <h2>📍 News for {{ request.user.preferred_city|default:request.user.city|default:"Your City" }}</h2>
+      <a href="#" class="rp-view-all">View all local &rarr;</a>
+    </div>
+    <div class="rp-grid-2">
+      {% for article in local_news %}
+      <div class="rp-card rp-hcard">
+        <div class="rp-card-img">
+          {% with article.media.first as media %}
+            {% if media and media.media_upload %}<img src="{{ media.media_upload.url }}" alt="{{ article.title }}" loading="lazy">
+            {% else %}<div class="rp-card-img-placeholder">🏙️</div>{% endif %}
+          {% endwith %}
+          <span class="rp-cat-tag">{{ article.category|default:"Local" }}</span>
+        </div>
+        <div class="rp-card-body">
+          <div class="rp-card-meta">
+            <span>{{ article.city }}</span>
+            <span>{{ article.created_at|date:"M d" }}</span>
+          </div>
+          <h3 class="rp-card-title"><a href="#">{{ article.title }}</a></h3>
+          <p class="rp-card-excerpt">{{ article.content|truncatechars:90 }}</p>
+          <div class="rp-card-footer">
+            <span>👁 {{ article.views_count }}</span>
+            <a href="{% url 'bookmark_article' article.id %}" class="rp-icon-btn {% if article.id in bookmarked_ids %}bookmarked{% endif %}">{% if article.id in bookmarked_ids %}⭐{% else %}☆{% endif %} Save</a>
+            <a href="{% url 'report_fake_news' article.id %}" class="rp-icon-btn" title="Report">🚩</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="grid-column:1/-1;text-align:center;padding:2.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rp-radius);">
+        <p style="color:var(--text-muted);margin-bottom:1rem;">No local news found. Set your city preference to see local stories.</p>
+        <button onclick="document.getElementById('prefModal').classList.add('open')" class="rp-btn-primary">Set Location</button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ===== STATE NEWS ===== -->
+  {% if state_news %}
+  <div class="rp-section">
+    <div class="rp-section-hdr">
+      <h2>🌍 {{ request.user.preferred_state|default:request.user.state|default:"State" }} News</h2>
+      <a href="#" class="rp-view-all">View all state &rarr;</a>
+    </div>
+    <div class="rp-grid-3">
+      {% for article in state_news %}
+      <div class="rp-card">
+        <div class="rp-card-img">
+          {% with article.media.first as media %}
+            {% if media and media.media_upload %}<img src="{{ media.media_upload.url }}" alt="{{ article.title }}" loading="lazy">
+            {% else %}<div class="rp-card-img-placeholder">🌍</div>{% endif %}
+          {% endwith %}
+          <span class="rp-cat-tag">{{ article.category|default:"State" }}</span>
+        </div>
+        <div class="rp-card-body">
+          <div class="rp-card-meta">
+            <span>{{ article.state }}</span>
+            <span>{{ article.created_at|timesince }} ago</span>
+          </div>
+          <h3 class="rp-card-title"><a href="#">{{ article.title }}</a></h3>
+          <p class="rp-card-excerpt">{{ article.content|truncatechars:100 }}</p>
+          <div class="rp-card-footer">
+            <span>👁 {{ article.views_count }}</span>
+            <a href="{% url 'bookmark_article' article.id %}" class="rp-icon-btn {% if article.id in bookmarked_ids %}bookmarked{% endif %}">{% if article.id in bookmarked_ids %}⭐{% else %}☆{% endif %} Save</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ===== TRENDING NEAR YOU ===== -->
+  <div class="rp-section">
+    <div class="rp-section-hdr">
+      <h2>🔥 Trending Near You</h2>
+    </div>
+    <div class="rp-grid-3">
+      {% for article in trending_news|slice:":6" %}
+      <div class="rp-card">
+        <div class="rp-card-img">
+          {% with article.media.first as media %}
+            {% if media and media.media_upload %}<img src="{{ media.media_upload.url }}" alt="{{ article.title }}" loading="lazy">
+            {% else %}<div class="rp-card-img-placeholder">🔥</div>{% endif %}
+          {% endwith %}
+          <span class="rp-cat-tag">{{ article.category|default:"Trending" }}</span>
+        </div>
+        <div class="rp-card-body">
+          <div class="rp-card-meta">
+            <span>{{ article.city|default:"Global" }}</span>
+            <span>{{ article.created_at|timesince }} ago</span>
+          </div>
+          <h3 class="rp-card-title"><a href="#">{{ article.title }}</a></h3>
+          <p class="rp-card-excerpt">{{ article.content|truncatechars:100 }}</p>
+          <div class="rp-card-footer">
+            <span>👁 {{ article.views_count }}</span>
+            <a href="{% url 'bookmark_article' article.id %}" class="rp-icon-btn {% if article.id in bookmarked_ids %}bookmarked{% endif %}">{% if article.id in bookmarked_ids %}⭐{% else %}☆{% endif %} Save</a>
+            <a href="{% url 'report_fake_news' article.id %}" class="rp-icon-btn">🚩</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p style="color:var(--text-muted);">No trending articles yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ===== RECOMMENDED FOR YOU ===== -->
+  <div class="rp-section">
+    <div class="rp-section-hdr">
+      <h2>✨ Recommended For You</h2>
+    </div>
+    <div class="rp-grid-3">
+      {% for article in recommended_news %}
+      <div class="rp-card">
+        <div class="rp-card-img">
+          {% with article.media.first as media %}
+            {% if media and media.media_upload %}<img src="{{ media.media_upload.url }}" alt="{{ article.title }}" loading="lazy">
+            {% else %}<div class="rp-card-img-placeholder">✨</div>{% endif %}
+          {% endwith %}
+          <span class="rp-cat-tag">{{ article.category|default:"For You" }}</span>
+        </div>
+        <div class="rp-card-body">
+          <div class="rp-card-meta">
+            <span>{{ article.category|default:"Analysis" }}</span>
+            <span>{{ article.created_at|date:"M d" }}</span>
+          </div>
+          <h3 class="rp-card-title"><a href="#">{{ article.title }}</a></h3>
+          <p class="rp-card-excerpt">{{ article.content|truncatechars:100 }}</p>
+          <div class="rp-card-footer">
+            <span>👁 {{ article.views_count }}</span>
+            <a href="{% url 'bookmark_article' article.id %}" class="rp-icon-btn {% if article.id in bookmarked_ids %}bookmarked{% endif %}">{% if article.id in bookmarked_ids %}⭐ Saved{% else %}☆ Save{% endif %}</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p style="color:var(--text-muted);">Read more articles to unlock personalized recommendations.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ===== CONTINUE READING ===== -->
+  {% if reading_history %}
+  <div class="rp-section">
+    <div class="rp-section-hdr">
+      <h2>🕒 Continue Reading</h2>
+    </div>
+    <div class="rp-widget" style="padding:0.5rem 1.4rem;">
+      {% for item in reading_history %}
+      <div class="rp-continue-item">
+        <div class="rp-continue-thumb">
+          {% with item.article.media.first as media %}
+            {% if media and media.media_upload %}<img src="{{ media.media_upload.url }}" alt="">{% endif %}
+          {% endwith %}
+        </div>
         <div>
-            <span class="category-tag">Member Premium</span>
-            <h1 class="welcome-text">Welcome Back, {{ request.user.first_name|default:request.user.email }}</h1>
-            <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 700px; margin-top: 10px;">
-                Your curated feed across the city and the state.
-            </p>
-            
-            <div style="margin-top: 15px;">
-                {% if request.user.city %}
-                    <span class="preference-badge">📍 Location: {{ request.user.city }}</span>
-                {% endif %}
-                {% if request.user.preferred_city %}
-                    <span class="preference-badge">🎯 Following: {{ request.user.preferred_city }}</span>
-                {% endif %}
-                <a href="#" style="font-size: 0.85rem; color: var(--text-muted); text-decoration: underline;">Edit Preferences</a>
-            </div>
+          <a href="#" class="rp-continue-title">{{ item.article.title }}</a>
+          <div class="rp-continue-meta">{{ item.article.category|default:"News" }} &bull; {{ item.read_at|timesince }} ago</div>
         </div>
-        
-        <div style="display: flex; gap: 10px;">
-            <a href="#" class="btn-theme" style="padding: 10px 20px; text-decoration: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-color);">
-                🔍 Search News
-            </a>
-        </div>
+      </div>
+      {% endfor %}
     </div>
-</div>
+  </div>
+  {% endif %}
 
-<div style="display: grid; grid-template-columns: 1fr 350px; gap: 3rem;">
-    <!-- Main Content Area -->
-    <div class="main-feed-area">
-        
-        <!-- Local News Section -->
-        <div class="section-spacing">
-            <div class="section-header">
-                <h2>Local News Insights</h2>
-                <a href="#" class="view-all-link">View all local &rarr;</a>
-            </div>
-            
-            <div class="news-grid-2">
-                {% for article in local_news %}
-                    <div class="dashboard-card horizontal-card">
-                        <div class="card-img-wrapper">
-                            <div class="card-category">{{ article.category|default:"Local" }}</div>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-meta">
-                                <span>{{ article.city|default:"City" }}, {{ article.state|default:"State" }}</span>
-                                <span>{{ article.created_at|date:"M d, Y" }}</span>
-                            </div>
-                            <h3 class="card-title">
-                                <a href="#">{{ article.title }}</a>
-                            </h3>
-                            <div class="card-footer-meta">
-                                <span class="icon-text">👁 {{ article.views_count }} Views</span>
-                                <span class="icon-text">
-                                    <a href="{% url 'bookmark_article' article.id %}" style="text-decoration:none; color:inherit;" title="Save Article">⭐</a>
-                                </span>
-                                <span class="icon-text">
-                                    <a href="{% url 'report_fake_news' article.id %}" style="text-decoration:none; color:inherit;" title="Report Fake News">🚩</a>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                {% empty %}
-                    <div class="dashboard-card" style="grid-column: 1 / -1; padding: 2rem; text-align: center; background: rgba(0,0,0,0.02);">
-                        <p style="color: var(--text-muted); margin-bottom: 1rem;">Update your location preferences to see news from your city.</p>
-                        <a href="#" style="color: var(--accent); font-weight: 600; text-decoration: none;">Set Preferences</a>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
+</div><!-- end rp-main -->
 
-        <!-- Latest News Section -->
-        <div class="section-spacing">
-            <div class="section-header">
-                <h2>Latest Headlines</h2>
-                <a href="#" class="view-all-link">Browse all news &rarr;</a>
-            </div>
-            
-            <div class="news-grid-4">
-                {% for article in latest_news %}
-                    <div class="dashboard-card">
-                        <div class="card-img-wrapper">
-                            <div class="card-category">{{ article.category|default:"News" }}</div>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-meta">
-                                <span>{{ article.created_at|timesince }} ago</span>
-                            </div>
-                            <h3 class="card-title">
-                                <a href="#">{{ article.title }}</a>
-                            </h3>
-                            <div class="card-footer-meta">
-                                <span class="icon-text">👁 {{ article.views_count }}</span>
-                                <span class="icon-text">
-                                    <a href="{% url 'bookmark_article' article.id %}" style="text-decoration:none; color:inherit;" title="Save Article">⭐</a>
-                                </span>
-                                <span class="icon-text">
-                                    <a href="{% url 'report_fake_news' article.id %}" style="text-decoration:none; color:inherit;" title="Report Fake News">🚩</a>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                {% empty %}
-                     <p style="color: var(--text-muted);">No new headlines at the moment.</p>
-                {% endfor %}
-            </div>
-        </div>
+<!-- ===== RIGHT SIDEBAR ===== -->
+<aside class="rp-sidebar">
 
-        <!-- Recommended Section -->
-        <div class="section-spacing">
-            <div class="section-header">
-                <h2>Recommended For You</h2>
-            </div>
-            
-            <div class="news-grid-4">
-                {% for article in recommended_news %}
-                    <div class="dashboard-card">
-                        <div class="card-img-wrapper"></div>
-                        <div class="card-content">
-                            <div class="card-meta">
-                                <span>{{ article.category|default:"Analysis" }}</span>
-                            </div>
-                            <h3 class="card-title" style="font-size: 1.05rem;">
-                                <a href="#">{{ article.title }}</a>
-                            </h3>
-                            <div class="card-footer-meta">
-                                <span class="icon-text">
-                                    <a href="{% url 'bookmark_article' article.id %}" style="text-decoration:none; color:inherit;" title="Save Article">⭐ Save</a>
-                                </span>
-                                <span class="icon-text">
-                                    <a href="{% url 'report_fake_news' article.id %}" style="text-decoration:none; color:inherit;" title="Report Fake News">🚩 Report</a>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                {% empty %}
-                     <p style="color: var(--text-muted);">Read more articles to get personalized recommendations.</p>
-                {% endfor %}
-            </div>
-        </div>
+  <!-- Dark Mode Toggle -->
+  <div class="rp-widget" style="padding:1rem 1.2rem;">
+    <button class="rp-dark-toggle" id="darkModeToggle">
+      <span>🌙 Dark Mode</span>
+      <div class="rp-toggle-switch" id="toggleSwitch"></div>
+    </button>
+  </div>
 
+  <!-- Quick Links -->
+  <div class="rp-widget">
+    <div class="rp-widget-title">Quick Links</div>
+    <a href="#" class="rp-quick-link">
+      <span>⭐ Saved Articles</span>
+      <span class="badge-count">{{ saved_count }}</span>
+    </a>
+    <a href="#" class="rp-quick-link">
+      <span>💬 My Comments</span>
+      <span class="badge-count">{{ comments_count }}</span>
+    </a>
+    <a href="#" class="rp-quick-link">
+      <span>🕒 Reading History</span>
+      <span class="badge-count">{{ articles_read_count }}</span>
+    </a>
+    <a href="#" class="rp-quick-link">
+      <span>🔔 Notifications</span>
+      <span class="badge-count" style="background:#f59e0b;">3</span>
+    </a>
+    <a href="#" class="rp-quick-link">
+      <span>⚙️ Account Settings</span>
+      <span style="color:var(--text-muted);">&rarr;</span>
+    </a>
+    <button onclick="document.getElementById('prefModal').classList.add('open')" class="rp-quick-link" style="border:1px solid var(--border);background:none;cursor:pointer;text-align:left;width:100%;">
+      <span>📍 Change Preferences</span>
+      <span style="color:var(--text-muted);">&rarr;</span>
+    </button>
+  </div>
+
+  <!-- Pro Intelligence Card -->
+  <div class="rp-pro-card">
+    <div class="rp-pro-title">Pro Intelligence 🚀</div>
+    <ul class="rp-pro-features">
+      <li>✔ Ad-free reading</li>
+      <li>✔ Premium municipal reports</li>
+      <li>✔ Early access to exclusives</li>
+      <li>✔ Unlimited bookmarks</li>
+    </ul>
+    <div class="rp-pro-status">
+      <span>Status: <span class="rp-pro-active">Active</span></span>
+      <button class="rp-pro-manage">Manage</button>
     </div>
+    <div style="font-size:0.78rem;opacity:0.8;margin-bottom:4px;">Subscription Usage</div>
+    <div class="rp-progress-bar"><div class="rp-progress-fill" id="proProgress"></div></div>
+    <div class="rp-progress-label"><span>68% used</span><span>Renews Apr 20</span></div>
+  </div>
 
-    <!-- Right Sidebar Area -->
-    <aside class="sidebar-area">
-        
-        <!-- Trending Widget -->
-        <div class="sidebar-widget">
-            <h3 class="widget-title">Trending Now</h3>
-            <ul class="trending-list">
-                {% for article in trending_news %}
-                    <li class="trending-item">
-                        <span class="trending-rank">{{ forloop.counter }}</span>
-                        <div>
-                            <h4 class="trending-title"><a href="#">{{ article.title }}</a></h4>
-                            <span style="font-size: 0.8rem; color: var(--text-muted);">{{ article.views_count }} Views • {{ article.city|default:"Global" }}</span>
-                        </div>
-                    </li>
-                {% empty %}
-                     <p style="color: var(--text-muted); font-size: 0.9rem;">Trending data unavailable.</p>
-                {% endfor %}
-            </ul>
-        </div>
+  <!-- Trending Widget -->
+  <div class="rp-widget">
+    <div class="rp-widget-title">🔥 Trending Now</div>
+    {% for article in trending_news|slice:":5" %}
+    <div class="rp-trending-item">
+      <span class="rp-trending-rank">{{ forloop.counter }}</span>
+      <div>
+        <div class="rp-trending-title"><a href="#">{{ article.title|truncatechars:60 }}</a></div>
+        <span style="font-size:0.75rem;color:var(--text-muted);">👁 {{ article.views_count }} &bull; {{ article.city|default:"Global" }}</span>
+      </div>
+    </div>
+    {% empty %}
+    <p style="color:var(--text-muted);font-size:0.85rem;">Trending data unavailable.</p>
+    {% endfor %}
+  </div>
 
-        <!-- Quick Actions Widget -->
-        <div class="sidebar-widget">
-            <h3 class="widget-title">Quick Links</h3>
-            <ul style="list-style: none; padding: 0; margin: 0;">
-                <li style="margin-bottom: 15px;">
-                    <a href="#" style="display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: var(--text-color); font-weight: 500; border: 1px solid var(--border); padding: 12px; border-radius: 8px;">
-                        <span>⭐ Saved Articles</span>
-                        <span style="color: var(--text-muted);">&rarr;</span>
-                    </a>
-                </li>
-                <li style="margin-bottom: 15px;">
-                    <a href="#" style="display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: var(--text-color); font-weight: 500; border: 1px solid var(--border); padding: 12px; border-radius: 8px;">
-                        <span>💬 My Comments</span>
-                        <span style="color: var(--text-muted);">&rarr;</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        
-        <!-- Subscription Status -->
-        <div class="sidebar-widget" style="background: var(--accent); color: white; border: none;">
-            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; margin-bottom: 10px;">Pro Intelligence</h3>
-            <p style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.9;">Your subscription is active. Enjoy ad-free reading and exclusive municipal insight reports.</p>
-            <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; font-size: 0.85rem; display: flex; justify-content: space-between;">
-                <span>Status: <strong style="color: #4ade80;">Active</strong></span>
-                <a href="#" style="color: white; text-decoration: underline;">Manage</a>
+  <!-- Saved Articles Widget -->
+  {% if saved_articles %}
+  <div class="rp-widget">
+    <div class="rp-widget-title">⭐ Saved Articles</div>
+    {% for bookmark in saved_articles %}
+    <div class="rp-mini-item">
+      <div class="rp-mini-dot"></div>
+      <div>
+        <a href="#" class="rp-mini-title">{{ bookmark.article.title|truncatechars:55 }}</a>
+        <div class="rp-mini-meta">{{ bookmark.article.category|default:"News" }} &bull; {{ bookmark.created_at|date:"M d" }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Reading History Widget -->
+  {% if reading_history %}
+  <div class="rp-widget">
+    <div class="rp-widget-title">🕒 Reading History</div>
+    {% for item in reading_history %}
+    <div class="rp-mini-item">
+      <div class="rp-mini-dot" style="background:var(--rp-accent2);"></div>
+      <div>
+        <a href="#" class="rp-mini-title">{{ item.article.title|truncatechars:55 }}</a>
+        <div class="rp-mini-meta">{{ item.read_at|timesince }} ago</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</aside>
+</div><!-- end rp-wrapper -->
+
+<script>
+// ===== DARK MODE TOGGLE =====
+const darkBtn = document.getElementById('darkModeToggle');
+const htmlEl = document.documentElement;
+function syncDarkToggle() {
+  const isDark = htmlEl.getAttribute('data-theme') === 'dark';
+  darkBtn.querySelector('span').textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+}
+syncDarkToggle();
+darkBtn.addEventListener('click', () => {
+  const cur = htmlEl.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  htmlEl.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  syncDarkToggle();
+});
+
+// ===== SEARCH & FILTER =====
+const searchUrl = "{% url 'reader_search' %}";
+let searchTimeout = null;
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  const category = document.getElementById('filterCategory').value;
+  const date = document.getElementById('filterDate').value;
+  const city = document.getElementById('filterCity').value.trim();
+
+  if (!q && !category && !date && !city) { clearSearch(); return; }
+
+  const params = new URLSearchParams({ q, category, date, city });
+  const grid = document.getElementById('search-results-grid');
+  const section = document.getElementById('search-results-section');
+
+  // Show skeletons
+  grid.innerHTML = Array(6).fill(`
+    <div class="rp-skeleton">
+      <div class="sk-block sk-img"></div>
+      <div class="sk-block sk-line" style="margin-top:12px;"></div>
+      <div class="sk-block sk-line short"></div>
+      <div class="sk-block sk-line" style="margin-bottom:12px;"></div>
+    </div>`).join('');
+  section.classList.add('active');
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  fetch(`${searchUrl}?${params}`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('search-count').textContent = `${data.articles.length} result(s)`;
+      if (!data.articles.length) {
+        grid.innerHTML = '<div class="rp-no-results">😕 No articles found. Try different keywords.</div>';
+        return;
+      }
+      grid.innerHTML = data.articles.map(a => `
+        <div class="rp-card">
+          <div class="rp-card-img">
+            <div class="rp-card-img-placeholder">📰</div>
+            <span class="rp-cat-tag">${a.category}</span>
+          </div>
+          <div class="rp-card-body">
+            <div class="rp-card-meta">
+              <span>${a.city}${a.city && a.state ? ', ' : ''}${a.state}</span>
+              <span>${a.created_at}</span>
             </div>
-        </div>
+            <h3 class="rp-card-title"><a href="#">${a.title}</a></h3>
+            <p class="rp-card-excerpt">${a.excerpt}</p>
+            <div class="rp-card-footer">
+              <span>👁 ${a.views_count}</span>
+              <a href="/news/bookmark/${a.id}/" class="rp-icon-btn">☆ Save</a>
+              <a href="#" class="rp-read-more">🔖 Read More</a>
+            </div>
+          </div>
+        </div>`).join('');
+    })
+    .catch(() => {
+      grid.innerHTML = '<div class="rp-no-results">⚠️ Search failed. Please try again.</div>';
+    });
+}
 
-    </aside>
-</div>
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterCategory').value = '';
+  document.getElementById('filterDate').value = '';
+  document.getElementById('filterCity').value = '';
+  document.getElementById('search-results-section').classList.remove('active');
+}
+
+// Live search on input (debounced)
+document.getElementById('searchInput').addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(doSearch, 450);
+});
+document.getElementById('filterCategory').addEventListener('change', doSearch);
+document.getElementById('filterDate').addEventListener('change', doSearch);
+
+// ===== BOOKMARK ANIMATION =====
+document.querySelectorAll('.rp-icon-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    if (this.href && this.href.includes('/bookmark/')) return; // let Django handle it
+    this.style.transform = 'scale(1.4)';
+    setTimeout(() => this.style.transform = '', 300);
+  });
+});
+
+// ===== PRO PROGRESS BAR ANIMATION =====
+window.addEventListener('load', () => {
+  const bar = document.getElementById('proProgress');
+  if (bar) { bar.style.width = '0'; setTimeout(() => bar.style.width = '68%', 300); }
+});
+</script>
 {% endblock %}

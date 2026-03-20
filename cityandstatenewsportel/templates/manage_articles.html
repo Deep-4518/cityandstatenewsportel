@@ -1,155 +1,556 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Articles | CMS Platform</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background-color: #f3f4f6;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Articles | CMS Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root { --accent: #4f46e5; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; }
+    .sidebar-link { @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-all text-sm font-medium; }
+    .sidebar-link.active { @apply bg-indigo-600 text-white shadow-lg; }
+    /* Table row hover */
+    .art-row:hover { background: #f8faff; }
+    /* Skeleton shimmer */
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .shimmer { background: linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; }
+    /* Delete modal */
+    #deleteModal { display:none; }
+    #deleteModal.open { display:flex; }
+    /* Mobile card */
+    @media(max-width:768px){ .desktop-table{display:none;} .mobile-cards{display:block;} }
+    @media(min-width:769px){ .desktop-table{display:block;} .mobile-cards{display:none;} }
+    /* Tooltip */
+    .has-tip { position:relative; }
+    .has-tip:hover::after { content:attr(data-tip); position:absolute; bottom:110%; left:50%; transform:translateX(-50%); background:#1e293b; color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; white-space:nowrap; pointer-events:none; z-index:50; }
+    /* Sidebar mobile */
+    #sidebar { transition: transform 0.3s ease; }
+    @media(max-width:768px){ #sidebar.hidden-mobile { transform:translateX(-100%); position:fixed; z-index:200; height:100vh; } }
+    /* Smooth row fade-in */
+    .art-row { animation: fadeRow 0.3s ease both; }
+    @keyframes fadeRow { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+  </style>
 </head>
-<body>
+<body class="min-h-screen">
 
-<div class="min-h-screen flex flex-col md:flex-row bg-slate-50 font-sans text-slate-800">
-    <!-- Sidebar -->
-    <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-700 md:min-h-screen text-slate-300 flex-shrink-0">
-        <div class="p-6 border-b border-slate-700">
-            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-                <i class="fas fa-newspaper text-indigo-400"></i>
-                CMS Platform
-            </h2>
-        </div>
-        <nav class="p-4 space-y-2 text-sm font-medium">
-            <a href="{% url 'owner_dashboard' %}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fas fa-house w-5 text-center"></i> Dashboard
-            </a>
-            <a href="{% url 'add_article' %}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fas fa-pen-to-square w-5 text-center"></i> Add Article
-            </a>
-            <a href="{% url 'manage_articles' %}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-600 text-white shadow-md transition-colors">
-                <i class="fas fa-list w-5 text-center"></i> Manage Articles
-            </a>
-            <a href="{% url 'analytics' %}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fas fa-chart-line w-5 text-center"></i> Analytics
-            </a>
-        </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        <!-- Top Header -->
-        <header
-            class="bg-white shadow-sm border-b border-slate-200 px-6 py-4 flex justify-between items-center z-10 sticky top-0">
-            <div class="flex items-center gap-4">
-                <button class="md:hidden text-slate-500 hover:text-slate-700">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-                <h1 class="text-xl font-semibold text-slate-800">Manage Articles</h1>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="relative">
-                    <i class="fas fa-bell text-slate-400 hover:text-indigo-600 cursor-pointer text-lg"></i>
-                </div>
-                <div class="flex items-center gap-2 border-l border-slate-200 pl-4">
-                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-                        {{ request.user.first_name|default:"A"|slice:":1" }}
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Scrollable Content Area -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50">
-            <div class="max-w-6xl mx-auto">
-                <div class="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden">
-                    
-                    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
-                        <div class="relative w-64">
-                            <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
-                            <input type="text" placeholder="Search articles..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <a href="{% url 'add_article' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                            <i class="fas fa-plus"></i> New Article
-                        </a>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
-                                    <th class="px-6 py-4 font-medium">Article Title</th>
-                                    <th class="px-6 py-4 font-medium">Category</th>
-                                    <th class="px-6 py-4 font-medium">Author</th>
-                                    <th class="px-6 py-4 font-medium">Date/Time</th>
-                                    <th class="px-6 py-4 font-medium">Views</th>
-                                    <th class="px-6 py-4 font-medium text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-sm divide-y divide-slate-100">
-                                {% for article in articles %}
-                                <tr class="hover:bg-slate-50/50 transition-colors">
-                                    <td class="px-6 py-4 text-slate-800 font-medium">
-                                        {{ article.title|truncatechars:45 }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-md text-xs font-semibold">
-                                            {{ article.category|default:"Uncategorized" }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-slate-600">{{ article.author.first_name|default:article.author.email }}</td>
-                                    <td class="px-6 py-4 text-slate-500 text-xs">
-                                        {{ article.created_at|date:"M d, Y" }}<br>
-                                        {{ article.created_at|time:"H:i A" }}
-                                    </td>
-                                    <td class="px-6 py-4 text-slate-600">
-                                        <div class="flex items-center gap-1.5">
-                                            <i class="fas fa-eye text-slate-400"></i> {{ article.views_count }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <a href="#" class="text-slate-400 hover:text-green-600 transition-colors p-1" title="View Article">
-                                            <i class="fas fa-eye text-lg"></i>
-                                        </a>
-                                        <button class="text-slate-400 hover:text-indigo-600 transition-colors p-1 ml-2" title="Edit">
-                                            <i class="fas fa-pen-to-square"></i>
-                                        </button>
-                                        <button class="text-slate-400 hover:text-red-600 transition-colors p-1 ml-2" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="6" class="px-6 py-8 text-center text-slate-500">
-                                        <i class="fas fa-folder-open text-3xl mb-3 text-slate-300 block"></i>
-                                        No articles found. <a href="{% url 'add_article' %}" class="text-indigo-600 hover:underline">Create your first article</a>.
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
-                        <span class="text-sm text-slate-500">Showing {{ articles.count }} entries</span>
-                        <div class="flex gap-1">
-                            <button class="px-3 py-1 border border-slate-300 rounded text-slate-600 hover:bg-slate-100 text-sm disabled:opacity-50" disabled>Prev</button>
-                            <button class="px-3 py-1 bg-indigo-600 text-white rounded text-sm">1</button>
-                            <button class="px-3 py-1 border border-slate-300 rounded text-slate-600 hover:bg-slate-100 text-sm disabled:opacity-50" disabled>Next</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+<!-- ===== DELETE CONFIRMATION MODAL ===== -->
+<div id="deleteModal" class="fixed inset-0 bg-black/50 z-[999] items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="fas fa-trash-can text-red-500 text-2xl"></i>
+    </div>
+    <h3 class="text-lg font-bold text-slate-800 mb-1">Delete Article?</h3>
+    <p class="text-slate-500 text-sm mb-6" id="deleteModalMsg">This action cannot be undone.</p>
+    <div class="flex gap-3">
+      <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-slate-600 font-semibold hover:bg-slate-50 transition-colors">Cancel</button>
+      <form id="deleteForm" method="post" class="flex-1">
+        {% csrf_token %}
+        <button type="submit" class="w-full px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-colors">Delete</button>
+      </form>
+    </div>
+  </div>
 </div>
+
+<!-- ===== LAYOUT ===== -->
+<div class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="w-64 bg-slate-900 flex-shrink-0 flex flex-col min-h-screen">
+    <div class="px-6 py-5 border-b border-slate-700/60">
+      <a href="{% url 'home' %}" class="flex items-center gap-2.5">
+        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <i class="fas fa-newspaper text-white text-sm"></i>
+        </div>
+        <span class="text-white font-bold text-lg tracking-tight">CMS Portal</span>
+      </a>
+    </div>
+    <nav class="flex-1 p-4 space-y-1">
+      <a href="{% url 'owner_dashboard' %}" class="sidebar-link"><i class="fas fa-house w-4 text-center"></i> Dashboard</a>
+      <a href="{% url 'add_article' %}" class="sidebar-link"><i class="fas fa-pen-to-square w-4 text-center"></i> Add Article</a>
+      <a href="{% url 'manage_articles' %}" class="sidebar-link active"><i class="fas fa-list-ul w-4 text-center"></i> Manage Articles</a>
+      <a href="{% url 'analytics' %}" class="sidebar-link"><i class="fas fa-chart-line w-4 text-center"></i> Analytics</a>
+      <a href="{% url 'admin_analytics' %}" class="sidebar-link"><i class="fas fa-chart-pie w-4 text-center"></i> Admin Analytics</a>
+    </nav>
+    <div class="p-4 border-t border-slate-700/60">
+      <div class="flex items-center gap-3 px-3 py-2">
+        <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+          {{ request.user.first_name|default:"A"|slice:":1"|upper }}
+        </div>
+        <div class="min-w-0">
+          <div class="text-white text-sm font-semibold truncate">{{ request.user.first_name|default:"Admin" }}</div>
+          <div class="text-slate-400 text-xs truncate">{{ request.user.email }}</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- TOP BAR -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+      <div class="flex items-center gap-3">
+        <button id="sidebarToggle" class="md:hidden text-slate-500 hover:text-indigo-600 transition-colors">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+        <div>
+          <h1 class="text-xl font-bold text-slate-800">Manage Articles</h1>
+          <p class="text-xs text-slate-400 hidden sm:block">City &amp; State News Portal — Content Management</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="relative has-tip" data-tip="Notifications">
+          <i class="fas fa-bell text-slate-400 hover:text-indigo-600 text-lg transition-colors"></i>
+          <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold">3</span>
+        </button>
+        <a href="{% url 'add_article' %}" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-200 hover:-translate-y-0.5">
+          <i class="fas fa-plus"></i>
+          <span class="hidden sm:inline">Create New Article</span>
+          <span class="sm:hidden">New</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- SCROLLABLE CONTENT -->
+    <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+      <div class="max-w-7xl mx-auto space-y-6">
+
+        <!-- ===== STAT CARDS ===== -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Total Articles -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-newspaper text-indigo-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-slate-800">{{ total_articles }}</div>
+              <div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Total Articles</div>
+            </div>
+          </div>
+          <!-- Total Views -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-sky-50 rounded-xl flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-eye text-sky-500 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-slate-800">{{ total_views }}</div>
+              <div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Total Views</div>
+            </div>
+          </div>
+          <!-- Published -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-circle-check text-emerald-500 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-slate-800">{{ published_count }}</div>
+              <div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Published</div>
+            </div>
+          </div>
+          <!-- Draft -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-pen-ruler text-amber-500 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-slate-800">{{ draft_count }}</div>
+              <div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Drafts</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== FILTER + SEARCH BAR ===== -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+          <form method="get" id="filterForm" class="flex flex-wrap gap-3 items-center">
+            <!-- Search -->
+            <div class="relative flex-1 min-w-[200px]">
+              <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="text" name="q" value="{{ q }}" placeholder="Search articles..."
+                class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all"
+                id="liveSearch">
+            </div>
+            <!-- Category -->
+            <select name="category" onchange="this.form.submit()"
+              class="py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer">
+              <option value="">All Categories</option>
+              {% for cat in categories %}
+              <option value="{{ cat }}" {% if category == cat %}selected{% endif %}>{{ cat }}</option>
+              {% endfor %}
+            </select>
+            <!-- Status -->
+            <select name="status" onchange="this.form.submit()"
+              class="py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer">
+              <option value="">All Status</option>
+              <option value="published" {% if status == 'published' %}selected{% endif %}>🟢 Published</option>
+              <option value="draft" {% if status == 'draft' %}selected{% endif %}>🟡 Draft</option>
+            </select>
+            <!-- Sort -->
+            <select name="sort" onchange="this.form.submit()"
+              class="py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer">
+              <option value="latest" {% if sort == 'latest' %}selected{% endif %}>⏱ Latest</option>
+              <option value="views" {% if sort == 'views' %}selected{% endif %}>👁 Most Viewed</option>
+              <option value="az" {% if sort == 'az' %}selected{% endif %}>🔤 A–Z</option>
+              <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>📅 Oldest</option>
+            </select>
+            <button type="submit" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors">
+              <i class="fas fa-filter mr-1"></i> Filter
+            </button>
+            {% if q or category or status %}
+            <a href="{% url 'manage_articles' %}" class="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-sm font-medium transition-colors">
+              <i class="fas fa-xmark mr-1"></i> Clear
+            </a>
+            {% endif %}
+          </form>
+        </div>
+
+        <!-- ===== DESKTOP TABLE ===== -->
+        <div class="desktop-table bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <span class="text-sm text-slate-500">
+              Showing <strong class="text-slate-700">{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong class="text-slate-700">{{ page_obj.paginator.count }}</strong> entries
+            </span>
+            <span class="text-xs text-slate-400">
+              {% if q %}<span class="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-medium">Search: "{{ q }}"</span>{% endif %}
+            </span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+                  <th class="px-4 py-3 font-semibold w-12">#</th>
+                  <th class="px-4 py-3 font-semibold">Article</th>
+                  <th class="px-4 py-3 font-semibold">Category</th>
+                  <th class="px-4 py-3 font-semibold">Author</th>
+                  <th class="px-4 py-3 font-semibold">Location</th>
+                  <th class="px-4 py-3 font-semibold">Date</th>
+                  <th class="px-4 py-3 font-semibold text-center">Views</th>
+                  <th class="px-4 py-3 font-semibold text-center">Status</th>
+                  <th class="px-4 py-3 font-semibold text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-sm">
+                {% for article in page_obj %}
+                <tr class="art-row transition-colors" style="animation-delay: {{ forloop.counter0 }}0ms">
+                  <!-- # -->
+                  <td class="px-4 py-3 text-slate-400 text-xs font-mono">
+                    {{ forloop.counter|add:page_obj.start_index|add:"-1" }}
+                  </td>
+                  <!-- Article -->
+                  <td class="px-4 py-3">
+                    <div class="flex items-start gap-3">
+                      <!-- Thumbnail -->
+                      <div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-slate-100">
+                        {% with article.media.first as media %}
+                          {% if media and media.media_upload %}
+                            <img src="{{ media.media_upload.url }}" alt="" class="w-full h-full object-cover">
+                          {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-slate-300 text-xl">
+                              <i class="fas fa-image"></i>
+                            </div>
+                          {% endif %}
+                        {% endwith %}
+                      </div>
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
+                          <span class="font-semibold text-slate-800 leading-snug line-clamp-1">{{ article.title|truncatechars:50 }}</span>
+                          {% if article.views_count >= trending_threshold %}
+                          <span class="inline-flex items-center gap-1 text-[10px] bg-orange-50 text-orange-500 px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
+                            <i class="fas fa-arrow-trend-up"></i> Trending
+                          </span>
+                          {% endif %}
+                        </div>
+                        <p class="text-slate-400 text-xs line-clamp-2 leading-relaxed">{{ article.content|truncatechars:90 }}</p>
+                        <div class="text-[10px] text-slate-400 mt-1">Updated {{ article.updated_at|timesince }} ago</div>
+                      </div>
+                    </div>
+                  </td>
+                  <!-- Category -->
+                  <td class="px-4 py-3">
+                    <span class="inline-block px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-semibold">
+                      {{ article.category|default:"General" }}
+                    </span>
+                  </td>
+                  <!-- Author -->
+                  <td class="px-4 py-3">
+                    <a href="#" class="flex items-center gap-2 group">
+                      <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {{ article.author.first_name|default:"A"|slice:":1"|upper }}
+                      </div>
+                      <span class="text-slate-600 text-xs group-hover:text-indigo-600 transition-colors font-medium">
+                        {{ article.author.first_name|default:article.author.email|truncatechars:16 }}
+                      </span>
+                    </a>
+                  </td>
+                  <!-- Location -->
+                  <td class="px-4 py-3">
+                    <div class="text-xs text-slate-600">
+                      {% if article.city or article.state %}
+                        <i class="fas fa-location-dot text-slate-400 mr-1"></i>
+                        {{ article.city|default:"" }}{% if article.city and article.state %}, {% endif %}{{ article.state|default:"" }}
+                      {% else %}
+                        <span class="text-slate-300">—</span>
+                      {% endif %}
+                    </div>
+                  </td>
+                  <!-- Date -->
+                  <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
+                    <div>{{ article.created_at|date:"M d, Y" }}</div>
+                    <div class="text-slate-400">{{ article.created_at|time:"h:i A" }}</div>
+                  </td>
+                  <!-- Views -->
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-600">
+                      <i class="fas fa-eye text-slate-400"></i> {{ article.views_count }}
+                    </span>
+                  </td>
+                  <!-- Status -->
+                  <td class="px-4 py-3 text-center">
+                    {% if article.views_count > 0 %}
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold">
+                      <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Published
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-bold">
+                      <span class="w-1.5 h-1.5 bg-amber-400 rounded-full"></span> Draft
+                    </span>
+                    {% endif %}
+                  </td>
+                  <!-- Actions -->
+                  <td class="px-4 py-3">
+                    <div class="flex items-center justify-center gap-1">
+                      <a href="#" class="has-tip w-8 h-8 flex items-center justify-center rounded-lg bg-sky-50 text-sky-500 hover:bg-sky-100 transition-colors" data-tip="View">
+                        <i class="fas fa-eye text-sm"></i>
+                      </a>
+                      <a href="{% url 'add_article' %}" class="has-tip w-8 h-8 flex items-center justify-center rounded-lg bg-amber-50 text-amber-500 hover:bg-amber-100 transition-colors" data-tip="Edit">
+                        <i class="fas fa-pen text-sm"></i>
+                      </a>
+                      <button onclick="openDeleteModal({{ article.id }}, '{{ article.title|escapejs }}')"
+                        class="has-tip w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors" data-tip="Delete">
+                        <i class="fas fa-trash text-sm"></i>
+                      </button>
+                      <button class="has-tip w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-yellow-50 hover:text-yellow-500 transition-colors bookmark-btn" data-tip="Bookmark" data-id="{{ article.id }}">
+                        <i class="fas fa-star text-sm"></i>
+                      </button>
+                      <button class="has-tip w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-indigo-50 hover:text-indigo-500 transition-colors pin-btn" data-tip="Pin Article" data-id="{{ article.id }}">
+                        <i class="fas fa-thumbtack text-sm"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <!-- Empty State -->
+                <tr>
+                  <td colspan="9" class="px-6 py-20 text-center">
+                    <div class="flex flex-col items-center gap-4">
+                      <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-inbox text-slate-300 text-4xl"></i>
+                      </div>
+                      <div>
+                        <p class="text-slate-600 font-semibold text-lg mb-1">📭 No articles found</p>
+                        <p class="text-slate-400 text-sm">{% if q %}No results for "{{ q }}". Try a different search.{% else %}Start by creating your first article.{% endif %}</p>
+                      </div>
+                      <a href="{% url 'add_article' %}" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-md hover:-translate-y-0.5">
+                        <i class="fas fa-plus"></i> Create Article
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- PAGINATION -->
+          {% if page_obj.paginator.num_pages > 1 %}
+          <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3">
+            <span class="text-sm text-slate-500">
+              Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> entries
+            </span>
+            <div class="flex items-center gap-1">
+              {% if page_obj.has_previous %}
+              <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}"
+                class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-white text-sm font-medium transition-colors">
+                <i class="fas fa-chevron-left text-xs"></i>
+              </a>
+              {% endif %}
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold shadow-sm">{{ num }}</span>
+                {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                <a href="?page={{ num }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}"
+                  class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-white text-sm font-medium transition-colors">{{ num }}</a>
+                {% endif %}
+              {% endfor %}
+              {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}"
+                class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-white text-sm font-medium transition-colors">
+                <i class="fas fa-chevron-right text-xs"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- ===== MOBILE CARDS ===== -->
+        <div class="mobile-cards space-y-3">
+          {% for article in page_obj %}
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 art-row" style="animation-delay:{{ forloop.counter0 }}0ms">
+            <div class="flex gap-3">
+              <!-- Thumb -->
+              <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100">
+                {% with article.media.first as media %}
+                  {% if media and media.media_upload %}
+                    <img src="{{ media.media_upload.url }}" alt="" class="w-full h-full object-cover">
+                  {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-slate-300 text-2xl">
+                      <i class="fas fa-image"></i>
+                    </div>
+                  {% endif %}
+                {% endwith %}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                  <h3 class="font-semibold text-slate-800 text-sm leading-snug line-clamp-2">{{ article.title }}</h3>
+                  {% if article.views_count > 0 %}
+                  <span class="flex-shrink-0 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold">Live</span>
+                  {% else %}
+                  <span class="flex-shrink-0 px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-bold">Draft</span>
+                  {% endif %}
+                </div>
+                <div class="flex flex-wrap gap-2 mt-1.5 text-xs text-slate-500">
+                  <span class="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-semibold">{{ article.category|default:"General" }}</span>
+                  <span><i class="fas fa-eye mr-1 text-slate-400"></i>{{ article.views_count }}</span>
+                  <span><i class="fas fa-calendar mr-1 text-slate-400"></i>{{ article.created_at|date:"M d, Y" }}</span>
+                  {% if article.city %}<span><i class="fas fa-location-dot mr-1 text-slate-400"></i>{{ article.city }}</span>{% endif %}
+                </div>
+                {% if article.views_count >= trending_threshold %}
+                <span class="inline-flex items-center gap-1 text-[10px] bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full font-bold mt-1">
+                  <i class="fas fa-arrow-trend-up"></i> Trending
+                </span>
+                {% endif %}
+              </div>
+            </div>
+            <!-- Mobile Actions -->
+            <div class="flex gap-2 mt-3 pt-3 border-t border-slate-100">
+              <a href="#" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-sky-50 text-sky-600 rounded-xl text-xs font-semibold hover:bg-sky-100 transition-colors">
+                <i class="fas fa-eye"></i> View
+              </a>
+              <a href="{% url 'add_article' %}" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-amber-50 text-amber-600 rounded-xl text-xs font-semibold hover:bg-amber-100 transition-colors">
+                <i class="fas fa-pen"></i> Edit
+              </a>
+              <button onclick="openDeleteModal({{ article.id }}, '{{ article.title|escapejs }}')"
+                class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-red-50 text-red-500 rounded-xl text-xs font-semibold hover:bg-red-100 transition-colors">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </div>
+          {% empty %}
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-10 text-center">
+            <i class="fas fa-inbox text-slate-300 text-5xl mb-4 block"></i>
+            <p class="text-slate-600 font-semibold mb-1">📭 No articles found</p>
+            <p class="text-slate-400 text-sm mb-4">{% if q %}No results for "{{ q }}".{% else %}Create your first article.{% endif %}</p>
+            <a href="{% url 'add_article' %}" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors">
+              <i class="fas fa-plus"></i> Create Article
+            </a>
+          </div>
+          {% endfor %}
+
+          <!-- Mobile Pagination -->
+          {% if page_obj.paginator.num_pages > 1 %}
+          <div class="flex items-center justify-between pt-2">
+            <span class="text-xs text-slate-500">{{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+            <div class="flex gap-2">
+              {% if page_obj.has_previous %}
+              <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}"
+                class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50">← Prev</a>
+              {% endif %}
+              {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700">Next →</a>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+      </div><!-- end max-w-7xl -->
+    </div><!-- end scrollable -->
+  </main>
+</div><!-- end layout -->
+
+<!-- ===== TOAST NOTIFICATION ===== -->
+<div id="toast" class="fixed bottom-6 right-6 z-[999] hidden">
+  <div class="bg-slate-800 text-white px-5 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2">
+    <i class="fas fa-check-circle text-emerald-400"></i>
+    <span id="toastMsg">Done!</span>
+  </div>
+</div>
+
+<script>
+// ===== DELETE MODAL =====
+function openDeleteModal(id, title) {
+  document.getElementById('deleteModalMsg').textContent = `Delete "${title}"? This cannot be undone.`;
+  document.getElementById('deleteForm').action = `/news/delete-article/${id}/`;
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+// ===== LIVE SEARCH (debounced) =====
+let searchTimer;
+document.getElementById('liveSearch').addEventListener('input', function() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    document.getElementById('filterForm').submit();
+  }, 500);
+});
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 2800);
+}
+
+// ===== BOOKMARK TOGGLE =====
+document.querySelectorAll('.bookmark-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const icon = this.querySelector('i');
+    const isActive = icon.classList.contains('text-yellow-500');
+    icon.classList.toggle('text-yellow-500', !isActive);
+    icon.classList.toggle('text-slate-400', isActive);
+    this.classList.toggle('bg-yellow-50', !isActive);
+    this.classList.toggle('bg-slate-50', isActive);
+    showToast(isActive ? 'Bookmark removed' : '⭐ Article bookmarked');
+  });
+});
+
+// ===== PIN TOGGLE =====
+document.querySelectorAll('.pin-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const icon = this.querySelector('i');
+    const isActive = icon.classList.contains('text-indigo-500');
+    icon.classList.toggle('text-indigo-500', !isActive);
+    icon.classList.toggle('text-slate-400', isActive);
+    this.classList.toggle('bg-indigo-50', !isActive);
+    this.classList.toggle('bg-slate-50', isActive);
+    showToast(isActive ? 'Article unpinned' : '📌 Article pinned as featured');
+  });
+});
+
+// ===== MOBILE SIDEBAR TOGGLE =====
+document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('hidden-mobile');
+});
+</script>
 </body>
 </html>
