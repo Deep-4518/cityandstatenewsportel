@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (owner_dashboard, user_dashboard, add_article, add_payment,
                     manage_articles, delete_article, analytics, admin_analytics_dashboard,
-                    report_fake_news, bookmark_article, reader_search)
+                    report_fake_news, bookmark_article, reader_search,
+                    live_news, live_news_api)
 
 urlpatterns = [
     path('owner/', owner_dashboard, name='owner_dashboard'),
@@ -15,4 +16,6 @@ urlpatterns = [
     path('report-fake-news/<int:article_id>/', report_fake_news, name='report_fake_news'),
     path('bookmark/<int:article_id>/', bookmark_article, name='bookmark_article'),
     path('search/', reader_search, name='reader_search'),
+    path('live/', live_news, name='live_news'),
+    path('live/api/', live_news_api, name='live_news_api'),
 ]

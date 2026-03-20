@@ -2,12 +2,16 @@ from django import forms
 from .models import User
 
 class SignupForm(forms.ModelForm):
-    password1 = forms.CharField(widget=forms.PasswordInput)
-    password2 = forms.CharField(widget=forms.PasswordInput)
+    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
+    password2 = forms.CharField(label='Re-Password', widget=forms.PasswordInput)
+    role = forms.ChoiceField(
+        choices=[('', 'Select Role'), ('owner', 'Reporter'), ('user', 'Reader')],
+        initial='',
+    )
 
     class Meta:
         model = User
-        fields = ['email','first_name','last_name','gender','mobile','role']
+        fields = ['first_name','last_name','gender','role','mobile','email']
         widgets = {
             'gender': forms.RadioSelect(),
         }

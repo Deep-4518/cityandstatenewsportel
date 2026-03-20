@@ -1,284 +1,336 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Article | CMS Platform</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background-color: #f3f4f6;
-        }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Add Article | The Daily Portal{% endblock %}
 
-<div class="min-h-screen flex flex-col md:flex-row bg-slate-50 font-sans text-slate-800">
-    <!-- Sidebar -->
-    <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-700 md:min-h-screen text-slate-300 flex-shrink-0">
-        <div class="p-6 border-b border-slate-700">
-            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-                <i class="fas fa-newspaper text-indigo-400"></i>
-                CMS Platform
-            </h2>
+{% block city_options %}{% for city in cities %}<option value="{{ city }}">{{ city }}</option>{% endfor %}{% endblock %}
+{% block state_options %}{% for state in states %}<option value="{{ state }}">{{ state }}</option>{% endfor %}{% endblock %}
+
+{% block extra_head %}
+<style>
+.aa-wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+.aa-header {
+  background: linear-gradient(135deg, #0d1b2a 0%, #1b2d3e 100%);
+  border-radius: var(--radius-lg); padding: 1.75rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
+  box-shadow: var(--shadow-lg);
+}
+.aa-header h1 { font-family: var(--font-serif); font-size: 1.75rem; font-weight: 900; color: #fff; margin: 0; }
+.aa-header p  { color: rgba(255,255,255,.5); font-size: .82rem; margin-top: .2rem; }
+.aa-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.1); color: #fff; font-size: .82rem; font-weight: 600;
+  padding: .5rem 1.1rem; border-radius: 50px; text-decoration: none;
+  border: 1px solid rgba(255,255,255,.15); transition: background .2s;
+}
+.aa-back:hover { background: rgba(255,255,255,.2); }
+
+.aa-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.aa-card-head {
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  padding: 1.25rem 1.75rem; display: flex; align-items: center; gap: .75rem;
+}
+.aa-card-head-icon {
+  width: 40px; height: 40px; background: rgba(230,57,70,.1);
+  border-radius: var(--radius); display: flex; align-items: center; justify-content: center;
+  color: var(--red); font-size: 1rem;
+}
+.aa-card-head h2 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0; }
+.aa-card-head p  { font-size: .78rem; color: var(--text-muted); margin: 0; }
+
+.aa-body { padding: 1.75rem; }
+
+/* Fields */
+.aa-field { margin-bottom: 1.25rem; }
+.aa-field label {
+  display: block; font-size: .75rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .6px;
+  color: var(--text-muted); margin-bottom: .4rem;
+}
+.aa-input-wrap { position: relative; }
+.aa-input-wrap .aa-icon {
+  position: absolute; left: .85rem; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted); font-size: .8rem; pointer-events: none; z-index: 1;
+}
+.aa-input-wrap input,
+.aa-input-wrap select,
+.aa-input-wrap textarea {
+  width: 100%; padding: .65rem .9rem .65rem 2.3rem;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius); color: var(--text);
+  font-family: var(--font-sans); font-size: .875rem; margin: 0;
+  transition: border-color .2s, box-shadow .2s;
+}
+.aa-input-wrap input:focus,
+.aa-input-wrap select:focus,
+.aa-input-wrap textarea:focus {
+  outline: none; border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(230,57,70,.1);
+}
+.aa-input-wrap input::placeholder,
+.aa-input-wrap textarea::placeholder { color: var(--text-faint); }
+.aa-input-wrap textarea { padding-left: .9rem; resize: vertical; min-height: 220px; }
+
+/* Toolbar */
+.aa-toolbar {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-bottom: none; border-radius: var(--radius) var(--radius) 0 0;
+  padding: .4rem .6rem; display: flex; gap: .25rem; flex-wrap: wrap;
+}
+.aa-toolbar button {
+  background: none; border: none; color: var(--text-muted);
+  padding: .3rem .55rem; border-radius: var(--radius-sm);
+  font-size: .8rem; cursor: pointer; margin: 0; width: auto;
+  transition: background .15s, color .15s;
+}
+.aa-toolbar button:hover { background: var(--border); color: var(--text); transform: none; }
+.aa-toolbar-sep { width: 1px; background: var(--border); margin: .2rem .25rem; }
+.aa-textarea-wrap textarea {
+  border-radius: 0 0 var(--radius) var(--radius);
+  border-top: none;
+}
+
+/* Grid */
+.aa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+
+/* Custom dropdown */
+.aa-dd-wrap { position: relative; }
+.aa-dd-wrap .aa-icon { z-index: 2; }
+.aa-dd-wrap input { padding-right: 2rem; }
+.aa-chevron {
+  position: absolute; right: .75rem; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted); font-size: .7rem; pointer-events: none;
+}
+.aa-dropdown {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--bg-card); border: 1.5px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-md);
+  max-height: 210px; overflow-y: auto; z-index: 999;
+  padding: 4px 0; margin: 0; list-style: none;
+}
+.aa-dropdown li {
+  padding: .5rem .9rem; cursor: pointer; font-size: .875rem; color: var(--text);
+  transition: background .12s;
+}
+.aa-dropdown li:hover { background: var(--bg); }
+
+/* Divider */
+.aa-divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+/* Actions */
+.aa-actions { display: flex; justify-content: flex-end; gap: .75rem; flex-wrap: wrap; }
+.aa-btn-cancel {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: .65rem 1.3rem; border: 1.5px solid var(--border);
+  border-radius: var(--radius); background: transparent; color: var(--text);
+  font-size: .875rem; font-weight: 600; cursor: pointer;
+  font-family: var(--font-sans); text-decoration: none;
+  transition: border-color .2s, color .2s; margin: 0; width: auto;
+}
+.aa-btn-cancel:hover { border-color: var(--red); color: var(--red); transform: none; }
+.aa-btn-draft {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: .65rem 1.3rem; border: 1.5px solid var(--navy);
+  border-radius: var(--radius); background: transparent; color: var(--navy);
+  font-size: .875rem; font-weight: 700; cursor: pointer;
+  font-family: var(--font-sans); transition: background .2s, color .2s; margin: 0; width: auto;
+}
+.aa-btn-draft:hover { background: var(--navy); color: #fff; transform: none; }
+.aa-btn-publish {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: .65rem 1.5rem; background: var(--red); color: #fff;
+  border: none; border-radius: var(--radius); font-size: .875rem; font-weight: 700;
+  cursor: pointer; font-family: var(--font-sans);
+  transition: background .2s, transform .15s; margin: 0; width: auto;
+}
+.aa-btn-publish:hover { background: var(--red-dark); transform: translateY(-1px); }
+
+/* Messages */
+.aa-msg { padding: .75rem 1rem; border-radius: var(--radius); font-size: .875rem; margin-bottom: 1.25rem; }
+.aa-msg.success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+.aa-msg.error   { background: var(--red-soft); color: var(--red); border: 1px solid rgba(230,57,70,.25); }
+
+@media (max-width: 640px) {
+  .aa-grid { grid-template-columns: 1fr; }
+  .aa-wrap { padding: 1rem 1rem 3rem; }
+  .aa-header { flex-direction: column; align-items: flex-start; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="aa-wrap">
+
+  <!-- HEADER -->
+  <div class="aa-header">
+    <div>
+      <h1>✍️ Add New Article</h1>
+      <p>Publish a new story to the portal</p>
+    </div>
+    <a href="{% url 'owner_dashboard' %}" class="aa-back"><i class="fas fa-arrow-left"></i> Dashboard</a>
+  </div>
+
+  <!-- FORM CARD -->
+  <div class="aa-card">
+    <div class="aa-card-head">
+      <div class="aa-card-head-icon"><i class="fas fa-file-signature"></i></div>
+      <div>
+        <h2>Article Details</h2>
+        <p>Fill in the fields below and publish your story</p>
+      </div>
+    </div>
+
+    <div class="aa-body">
+      {% if messages %}
+        {% for message in messages %}
+        <div class="aa-msg {% if message.tags == 'success' %}success{% else %}error{% endif %}">
+          <i class="fas {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+          {{ message }}
         </div>
-        <nav class="p-4 space-y-2 text-sm font-medium">
-            <a href="{% url 'owner_dashboard' %}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fas fa-house w-5 text-center"></i> Dashboard
-            </a>
-            <a href="#"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-600 text-white shadow-md transition-colors">
-                <i class="fas fa-pen-to-square w-5 text-center"></i> Add Article
-            </a>
-            <a href="{% url 'manage_articles' %}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fas fa-list w-5 text-center"></i> Manage Articles
-            </a>
-            <a href="{% url 'analytics' %}"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fas fa-chart-line w-5 text-center"></i> Analytics
-            </a>
-        </nav>
-    </aside>
+        {% endfor %}
+      {% endif %}
 
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        <!-- Top Header -->
-        <header
-            class="bg-white shadow-sm border-b border-slate-200 px-6 py-4 flex justify-between items-center z-10 sticky top-0">
-            <div class="flex items-center gap-4">
-                <button class="md:hidden text-slate-500 hover:text-slate-700">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-                <h1 class="text-xl font-semibold text-slate-800">Add New Article</h1>
-                <a href="{% url 'home' %}" target="_blank" class="hidden md:flex ml-4 items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 transition-colors">
-                    <i class="fas fa-external-link-alt text-xs"></i> View Live Site
-                </a>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="relative">
-                    <i class="fas fa-bell text-slate-400 hover:text-indigo-600 cursor-pointer text-lg"></i>
-                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                        <span
-                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
-                    </span>
-                </div>
-                <div class="flex items-center gap-2 border-l border-slate-200 pl-4">
-                    <div
-                        class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-                        {{ request.user.first_name|default:"A"|slice:":1" }}
-                    </div>
-                    <span class="text-sm font-medium hidden sm:block">{{ request.user.first_name }}</span>
-                </div>
-            </div>
-        </header>
+      <form action="{% url 'add_article' %}" method="POST">
+        {% csrf_token %}
 
-        <!-- Scrollable Form Area -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50">
-            <div class="max-w-4xl mx-auto">
-
-                <!-- Form Card -->
-                <div
-                    class="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden">
-                    <div class="bg-indigo-50/50 border-b border-slate-100 px-8 py-5 flex items-center gap-3">
-                        <div class="p-2 bg-indigo-100 rounded-lg text-indigo-600">
-                            <i class="fas fa-file-signature text-xl"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-semibold text-slate-800">Article Details</h2>
-                            <p class="text-sm text-slate-500">Publish or draft a new story for the portal</p>
-                        </div>
-                    </div>
-
-                    <form action="#" method="POST" class="p-8 space-y-6">
-                        {% csrf_token %}
-
-                        <!-- Title Field -->
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Article Title</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                    <i class="fas fa-heading"></i>
-                                </span>
-                                <input type="text" name="title" placeholder="Enter article title" required
-                                    class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-slate-50 hover:bg-white focus:bg-white outline-none">
-                            </div>
-                        </div>
-
-                        <!-- Content Field -->
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1 flex justify-between">
-                                <span>Article Content</span>
-                                <span class="text-xs text-slate-400 font-normal">Markdown / Rich Text Supported</span>
-                            </label>
-                            <div
-                                class="border border-slate-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-colors group">
-                                <!-- Fake Toolbar for visual realism -->
-                                <div
-                                    class="bg-slate-100 px-3 py-2 border-b border-slate-300 flex gap-2 text-slate-500 text-sm">
-                                    <button type="button" class="px-2 py-1 rounded hover:bg-slate-200"><i
-                                            class="fas fa-bold"></i></button>
-                                    <button type="button" class="px-2 py-1 rounded hover:bg-slate-200"><i
-                                            class="fas fa-italic"></i></button>
-                                    <button type="button" class="px-2 py-1 rounded hover:bg-slate-200"><i
-                                            class="fas fa-link"></i></button>
-                                    <div class="w-px h-5 bg-slate-300 my-auto mx-1"></div>
-                                    <button type="button" class="px-2 py-1 rounded hover:bg-slate-200"><i
-                                            class="fas fa-list-ul"></i></button>
-                                    <button type="button" class="px-2 py-1 rounded hover:bg-slate-200"><i
-                                            class="fas fa-image"></i></button>
-                                </div>
-                                <textarea name="content" rows="10" placeholder="Write full news content here..."
-                                    required
-                                    class="w-full p-4 bg-slate-50 group-hover:bg-white focus:bg-white outline-none resize-y"></textarea>
-                            </div>
-                        </div>
-
-                        <!-- 2-Column Grid for Metadata -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                            <!-- Category Field -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                        <i class="fas fa-layer-group"></i>
-                                    </span>
-                                    <select name="category" required
-                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-slate-50 outline-none">
-                                        <option value="" disabled selected>Select category</option>
-                                        <option value="politics">Politics</option>
-                                        <option value="sports">Sports</option>
-                                        <option value="technology">Technology</option>
-                                        <option value="business">Business</option>
-                                        <option value="entertainment">Entertainment</option>
-                                    </select>
-                                    <span
-                                        class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
-                                        <i class="fas fa-chevron-down text-xs"></i>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Journalist Field -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Journalist</label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                        <i class="fas fa-user-pen"></i>
-                                    </span>
-                                    <select name="journalist"
-                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-slate-50 outline-none">
-                                        <option value="" disabled selected>Select journalist</option>
-                                        <option value="1">Admin Author</option>
-                                        <option value="2">John Doe</option>
-                                        <option value="3">Jane Smith</option>
-                                    </select>
-                                    <span
-                                        class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
-                                        <i class="fas fa-chevron-down text-xs"></i>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- City Field -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">City</label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                        <i class="fas fa-city"></i>
-                                    </span>
-                                    <input type="text" name="city" placeholder="Enter city related to news"
-                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 outline-none">
-                                </div>
-                            </div>
-
-                            <!-- State Field -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">State</label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                        <i class="fas fa-map-location-dot"></i>
-                                    </span>
-                                    <input type="text" name="state" placeholder="Enter state related to news"
-                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 outline-none">
-                                </div>
-                            </div>
-
-                            <!-- Status Field -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                        <i class="fas fa-battery-half"></i>
-                                    </span>
-                                    <select name="status"
-                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-slate-50 outline-none">
-                                        <option value="pending" selected>Pending</option>
-                                        <option value="approved">Approved</option>
-                                        <option value="rejected">Rejected</option>
-                                    </select>
-                                    <span
-                                        class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
-                                        <i class="fas fa-chevron-down text-xs"></i>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Published Date Field -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Published Date</label>
-                                <div class="relative">
-                                    <span
-                                        class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">
-                                        <i class="fas fa-calendar-alt"></i>
-                                    </span>
-                                    <!-- Use padding left 10 to clear modern browser date icons that align left sometimes, standard is pl-10 -->
-                                    <input type="datetime-local" name="published_date"
-                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 outline-none text-slate-700">
-                                </div>
-                            </div>
-
-                            <!-- Views Field -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Views</label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                        <i class="fas fa-eye"></i>
-                                    </span>
-                                    <input type="number" name="views" value="0" min="0" readonly
-                                        class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed outline-none select-none">
-                                    <span
-                                        class="absolute right-3 top-2 text-xs text-slate-400 bg-white px-1 rounded">Default</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr class="border-slate-200 my-6">
-
-                        <!-- Action Buttons -->
-                        <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
-                            <button type="button" onclick="window.location.href='{% url 'owner_dashboard' %}'"
-                                class="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors flex items-center justify-center gap-2 focus:ring-2 focus:ring-slate-200 outline-none">
-                                <i class="fas fa-xmark"></i> Cancel
-                            </button>
-                            <button type="submit" name="action" value="draft"
-                                class="px-5 py-2.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg hover:bg-indigo-100 font-medium transition-colors flex items-center justify-center gap-2 focus:ring-2 focus:ring-indigo-300 outline-none">
-                                <i class="fas fa-floppy-disk"></i> Save as Draft
-                            </button>
-                            <button type="submit" name="action" value="publish"
-                                class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-md hover:shadow-lg font-medium transition-all flex items-center justify-center gap-2 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 outline-none">
-                                <i class="fas fa-check-circle"></i> Publish Article
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-            </div>
+        <!-- Title -->
+        <div class="aa-field">
+          <label>Article Title</label>
+          <div class="aa-input-wrap">
+            <i class="fas fa-heading aa-icon"></i>
+            <input type="text" name="title" placeholder="Enter article title" required>
+          </div>
         </div>
-    </main>
-</body>
-</html>
+
+        <!-- Content -->
+        <div class="aa-field">
+          <label>Article Content</label>
+          <div class="aa-toolbar">
+            <button type="button"><i class="fas fa-bold"></i></button>
+            <button type="button"><i class="fas fa-italic"></i></button>
+            <button type="button"><i class="fas fa-underline"></i></button>
+            <div class="aa-toolbar-sep"></div>
+            <button type="button"><i class="fas fa-list-ul"></i></button>
+            <button type="button"><i class="fas fa-list-ol"></i></button>
+            <button type="button"><i class="fas fa-link"></i></button>
+            <button type="button"><i class="fas fa-image"></i></button>
+          </div>
+          <div class="aa-textarea-wrap aa-input-wrap">
+            <textarea name="content" placeholder="Write full news content here…" required></textarea>
+          </div>
+        </div>
+
+        <!-- 2-col grid -->
+        <div class="aa-grid">
+
+          <!-- Category -->
+          <div class="aa-field">
+            <label>Category</label>
+            <div class="aa-input-wrap aa-dd-wrap" id="cat-wrapper">
+              <i class="fas fa-layer-group aa-icon"></i>
+              <input type="text" name="category" id="cat-input" placeholder="Select or type category" required autocomplete="off"
+                onfocus="showDD('cat')" oninput="filterDD('cat',this.value)">
+              <i class="fas fa-chevron-down aa-chevron"></i>
+              <ul class="aa-dropdown" id="cat-dropdown">
+                {% for cat in categories %}
+                <li onclick="pickDD('cat','{{ cat }}')" class="cat-opt">{{ cat }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+
+          <!-- Author -->
+          <div class="aa-field">
+            <label>Author Name</label>
+            <div class="aa-input-wrap">
+              <i class="fas fa-user-pen aa-icon"></i>
+              <input type="text" name="author_name" placeholder="Your name" value="{{ request.user.get_full_name }}">
+            </div>
+          </div>
+
+          <!-- City -->
+          <div class="aa-field">
+            <label>City</label>
+            <div class="aa-input-wrap aa-dd-wrap" id="city-wrapper">
+              <i class="fas fa-city aa-icon"></i>
+              <input type="text" name="city" id="city-input" placeholder="Select or type city" autocomplete="off"
+                onfocus="showDD('city')" oninput="filterDD('city',this.value)">
+              <i class="fas fa-chevron-down aa-chevron"></i>
+              <ul class="aa-dropdown" id="city-dropdown">
+                {% for city in cities %}
+                <li onclick="pickDD('city','{{ city }}')" class="city-opt">{{ city }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+
+          <!-- State -->
+          <div class="aa-field">
+            <label>State</label>
+            <div class="aa-input-wrap aa-dd-wrap" id="state-wrapper">
+              <i class="fas fa-map-location-dot aa-icon"></i>
+              <input type="text" name="state" id="state-input" placeholder="Select or type state" autocomplete="off"
+                onfocus="showDD('state')" oninput="filterDD('state',this.value)">
+              <i class="fas fa-chevron-down aa-chevron"></i>
+              <ul class="aa-dropdown" id="state-dropdown">
+                {% for state in states %}
+                <li onclick="pickDD('state','{{ state }}')" class="state-opt">{{ state }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+
+          <!-- Published Date -->
+          <div class="aa-field">
+            <label>Published Date</label>
+            <div class="aa-input-wrap">
+              <i class="fas fa-calendar-alt aa-icon"></i>
+              <input type="datetime-local" name="published_date">
+            </div>
+          </div>
+
+        </div>
+
+        <hr class="aa-divider">
+
+        <div class="aa-actions">
+          <a href="{% url 'owner_dashboard' %}" class="aa-btn-cancel"><i class="fas fa-xmark"></i> Cancel</a>
+          <button type="submit" name="action" value="draft" class="aa-btn-draft"><i class="fas fa-floppy-disk"></i> Save Draft</button>
+          <button type="submit" name="action" value="publish" class="aa-btn-publish"><i class="fas fa-circle-check"></i> Publish Article</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function showDD(key) { filterDD(key, document.getElementById(key+'-input').value); }
+function filterDD(key, val) {
+  const dd = document.getElementById(key+'-dropdown');
+  const items = dd.querySelectorAll('.'+key+'-opt');
+  let any = false;
+  items.forEach(li => {
+    const m = li.textContent.toLowerCase().includes(val.toLowerCase());
+    li.style.display = m ? '' : 'none';
+    if (m) any = true;
+  });
+  dd.style.display = any ? 'block' : 'none';
+}
+function pickDD(key, val) {
+  document.getElementById(key+'-input').value = val;
+  document.getElementById(key+'-dropdown').style.display = 'none';
+}
+document.addEventListener('click', function(e) {
+  ['cat','city','state'].forEach(key => {
+    const w = document.getElementById(key+'-wrapper');
+    if (w && !w.contains(e.target)) document.getElementById(key+'-dropdown').style.display = 'none';
+  });
+});
+</script>
+{% endblock %}

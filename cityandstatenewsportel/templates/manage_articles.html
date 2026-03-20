@@ -1,500 +1,453 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Articles | CMS Platform</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    :root { --accent: #4f46e5; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; }
-    .sidebar-link { @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-all text-sm font-medium; }
-    .sidebar-link.active { @apply bg-indigo-600 text-white shadow-lg; }
-    /* Table row hover */
-    .art-row:hover { background: #f8faff; }
-    /* Skeleton shimmer */
-    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-    .shimmer { background: linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; }
-    /* Delete modal */
-    #deleteModal { display:none; }
-    #deleteModal.open { display:flex; }
-    /* Mobile card */
-    @media(max-width:768px){ .desktop-table{display:none;} .mobile-cards{display:block;} }
-    @media(min-width:769px){ .desktop-table{display:block;} .mobile-cards{display:none;} }
-    /* Tooltip */
-    .has-tip { position:relative; }
-    .has-tip:hover::after { content:attr(data-tip); position:absolute; bottom:110%; left:50%; transform:translateX(-50%); background:#1e293b; color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; white-space:nowrap; pointer-events:none; z-index:50; }
-    /* Sidebar mobile */
-    #sidebar { transition: transform 0.3s ease; }
-    @media(max-width:768px){ #sidebar.hidden-mobile { transform:translateX(-100%); position:fixed; z-index:200; height:100vh; } }
-    /* Smooth row fade-in */
-    .art-row { animation: fadeRow 0.3s ease both; }
-    @keyframes fadeRow { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
-  </style>
-</head>
-<body class="min-h-screen">
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manage Articles | The Daily Portal{% endblock %}
 
-<!-- ===== DELETE CONFIRMATION MODAL ===== -->
-<div id="deleteModal" class="fixed inset-0 bg-black/50 z-[999] items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
-    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-      <i class="fas fa-trash-can text-red-500 text-2xl"></i>
-    </div>
-    <h3 class="text-lg font-bold text-slate-800 mb-1">Delete Article?</h3>
-    <p class="text-slate-500 text-sm mb-6" id="deleteModalMsg">This action cannot be undone.</p>
-    <div class="flex gap-3">
-      <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-slate-600 font-semibold hover:bg-slate-50 transition-colors">Cancel</button>
-      <form id="deleteForm" method="post" class="flex-1">
+{% block city_options %}{% for city in cities %}<option value="{{ city }}">{{ city }}</option>{% endfor %}{% endblock %}
+{% block state_options %}{% for state in states %}<option value="{{ state }}">{{ state }}</option>{% endfor %}{% endblock %}
+
+{% block extra_head %}
+<style>
+.ma-wrap { max-width: var(--container); margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* ── Header ── */
+.ma-header {
+  background: linear-gradient(135deg, #0d1b2a 0%, #1b2d3e 100%);
+  border-radius: var(--radius-lg); padding: 1.75rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
+  box-shadow: var(--shadow-lg);
+}
+.ma-header h1 { font-family: var(--font-serif); font-size: 1.75rem; font-weight: 900; color: #fff; margin: 0; }
+.ma-header p  { color: rgba(255,255,255,.5); font-size: .82rem; margin-top: .2rem; }
+.ma-new-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--red); color: #fff; font-weight: 700; font-size: .85rem;
+  padding: .6rem 1.3rem; border-radius: 50px; border: none; cursor: pointer;
+  text-decoration: none; transition: background .2s, transform .15s; white-space: nowrap;
+}
+.ma-new-btn:hover { background: var(--red-dark); transform: translateY(-1px); }
+
+/* ── Stat Cards ── */
+.ma-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.ma-stat {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+.ma-stat-icon {
+  width: 46px; height: 46px; border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; flex-shrink: 0;
+}
+.ma-stat-icon.navy  { background: rgba(13,27,42,.08); color: #0d1b2a; }
+.ma-stat-icon.red   { background: rgba(230,57,70,.1);  color: var(--red); }
+.ma-stat-icon.green { background: rgba(16,185,129,.1); color: #10b981; }
+.ma-stat-icon.gold  { background: rgba(245,158,11,.1); color: var(--gold); }
+.ma-stat-val  { font-size: 1.6rem; font-weight: 800; color: var(--text); line-height: 1; }
+.ma-stat-lbl  { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); margin-top: .2rem; }
+
+/* ── Filter Bar ── */
+.ma-filters {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1rem 1.25rem;
+  display: flex; flex-wrap: wrap; gap: .75rem; align-items: center;
+  margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);
+}
+.ma-search-wrap { position: relative; flex: 1; min-width: 200px; }
+.ma-search-wrap i { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: .8rem; }
+.ma-search-wrap input {
+  width: 100%; padding: .55rem .9rem .55rem 2.2rem;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius); font-size: .85rem; color: var(--text);
+  font-family: var(--font-sans); margin: 0;
+  transition: border-color .2s, box-shadow .2s;
+}
+.ma-search-wrap input:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(230,57,70,.1); }
+.ma-select {
+  padding: .55rem .9rem; background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius); font-size: .85rem; color: var(--text);
+  font-family: var(--font-sans); cursor: pointer;
+  transition: border-color .2s;
+}
+.ma-select:focus { outline: none; border-color: var(--red); }
+.ma-filter-btn {
+  padding: .55rem 1.2rem; background: var(--navy); color: #fff;
+  border: none; border-radius: var(--radius); font-size: .85rem;
+  font-weight: 700; cursor: pointer; font-family: var(--font-sans);
+  transition: background .2s; margin: 0; width: auto;
+}
+.ma-filter-btn:hover { background: var(--red); transform: none; }
+.ma-clear-btn {
+  padding: .55rem 1rem; background: transparent; color: var(--text-muted);
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  font-size: .85rem; font-weight: 600; cursor: pointer;
+  font-family: var(--font-sans); text-decoration: none;
+  transition: border-color .2s, color .2s; margin: 0; width: auto;
+}
+.ma-clear-btn:hover { border-color: var(--red); color: var(--red); transform: none; }
+
+/* ── Table Card ── */
+.ma-table-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.ma-table-top {
+  padding: .9rem 1.5rem; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: .82rem; color: var(--text-muted);
+}
+.ma-table-top strong { color: var(--text); }
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--bg); border-bottom: 2px solid var(--border); }
+thead th {
+  padding: .75rem 1rem; font-size: .7rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .7px; color: var(--text-muted);
+  text-align: left; white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+tbody tr:hover { background: var(--bg); }
+tbody tr:last-child { border-bottom: none; }
+td { padding: .85rem 1rem; font-size: .85rem; color: var(--text); vertical-align: middle; }
+
+/* ── Thumb ── */
+.art-thumb {
+  width: 46px; height: 46px; border-radius: var(--radius);
+  overflow: hidden; background: var(--bg-alt); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-faint); font-size: 1.1rem;
+}
+.art-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── Badges ── */
+.cat-badge {
+  display: inline-block; padding: 2px 10px; border-radius: 99px;
+  font-size: .7rem; font-weight: 700;
+  background: rgba(13,27,42,.08); color: var(--navy);
+}
+.status-pub {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 99px; font-size: .7rem; font-weight: 700;
+  background: rgba(16,185,129,.1); color: #059669;
+}
+.status-draft {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 99px; font-size: .7rem; font-weight: 700;
+  background: rgba(245,158,11,.1); color: #d97706;
+}
+.status-pub::before, .status-draft::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+}
+.status-pub::before   { background: #10b981; }
+.status-draft::before { background: #f59e0b; }
+.trend-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: .65rem; font-weight: 800; color: #ea580c;
+  background: rgba(234,88,12,.08); padding: 2px 7px; border-radius: 99px;
+}
+
+/* ── Action Buttons ── */
+.act-btn {
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer; font-size: .8rem;
+  transition: background .15s, color .15s; text-decoration: none;
+  background: var(--bg); color: var(--text-muted);
+}
+.act-btn:hover { transform: none; }
+.act-btn.view   { background: rgba(14,165,233,.1); color: #0ea5e9; }
+.act-btn.edit   { background: rgba(245,158,11,.1); color: #d97706; }
+.act-btn.delete { background: rgba(230,57,70,.1);  color: var(--red); }
+.act-btn.view:hover   { background: rgba(14,165,233,.2); }
+.act-btn.edit:hover   { background: rgba(245,158,11,.2); }
+.act-btn.delete:hover { background: rgba(230,57,70,.2); }
+
+/* ── Author chip ── */
+.author-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: .8rem; color: var(--text-sub);
+}
+.author-av {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: linear-gradient(135deg, #0d1b2a, #e63946);
+  color: #fff; font-size: .7rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+/* ── Empty ── */
+.ma-empty { text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
+.ma-empty i { font-size: 3rem; opacity: .2; margin-bottom: 1rem; display: block; }
+
+/* ── Pagination ── */
+.ma-pagination {
+  padding: .9rem 1.5rem; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .75rem; background: var(--bg);
+}
+.pg-info { font-size: .82rem; color: var(--text-muted); }
+.pg-info strong { color: var(--text); }
+.pg-btns { display: flex; gap: .35rem; }
+.pg-btn {
+  min-width: 32px; height: 32px; padding: 0 .6rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-size: .82rem; font-weight: 600; color: var(--text-muted);
+  text-decoration: none; transition: all .15s; background: var(--bg-card);
+}
+.pg-btn:hover { border-color: var(--red); color: var(--red); }
+.pg-btn.active { background: var(--red); color: #fff; border-color: var(--red); }
+
+/* ── Delete Modal ── */
+#deleteModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9999; align-items: center; justify-content: center; padding: 1rem; }
+#deleteModal.open { display: flex; }
+.del-modal-box {
+  background: var(--bg-card); border-radius: var(--radius-lg);
+  padding: 2rem; max-width: 380px; width: 100%; text-align: center;
+  box-shadow: var(--shadow-xl);
+}
+.del-modal-icon {
+  width: 60px; height: 60px; background: rgba(230,57,70,.1);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1rem; font-size: 1.5rem; color: var(--red);
+}
+.del-modal-box h3 { font-family: var(--font-serif); font-size: 1.3rem; font-weight: 800; margin-bottom: .4rem; }
+.del-modal-box p  { font-size: .875rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+.del-modal-btns { display: flex; gap: .75rem; }
+.del-cancel {
+  flex: 1; padding: .7rem; border: 1.5px solid var(--border);
+  border-radius: var(--radius); background: transparent; color: var(--text);
+  font-weight: 600; font-size: .875rem; cursor: pointer;
+  font-family: var(--font-sans); transition: background .2s; margin: 0; width: auto;
+}
+.del-cancel:hover { background: var(--bg); transform: none; }
+.del-confirm {
+  flex: 1; padding: .7rem; background: var(--red); color: #fff;
+  border: none; border-radius: var(--radius); font-weight: 700;
+  font-size: .875rem; cursor: pointer; font-family: var(--font-sans);
+  transition: background .2s; margin: 0; width: auto;
+}
+.del-confirm:hover { background: var(--red-dark); transform: none; }
+
+@media (max-width: 1024px) { .ma-stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px)  {
+  .ma-stats { grid-template-columns: repeat(2, 1fr); }
+  .ma-wrap  { padding: 1rem 1rem 3rem; }
+  .ma-header { flex-direction: column; align-items: flex-start; }
+  .desktop-only { display: none; }
+  table { font-size: .78rem; }
+  td, th { padding: .6rem .7rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- DELETE MODAL -->
+<div id="deleteModal">
+  <div class="del-modal-box">
+    <div class="del-modal-icon"><i class="fas fa-trash-can"></i></div>
+    <h3>Delete Article?</h3>
+    <p id="deleteModalMsg">This action cannot be undone.</p>
+    <div class="del-modal-btns">
+      <button class="del-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <form id="deleteForm" method="post" style="flex:1;margin:0;">
         {% csrf_token %}
-        <button type="submit" class="w-full px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-colors">Delete</button>
+        <button type="submit" class="del-confirm" style="width:100%;">Delete</button>
       </form>
     </div>
   </div>
 </div>
 
-<!-- ===== LAYOUT ===== -->
-<div class="flex min-h-screen">
+<div class="ma-wrap">
 
-  <!-- SIDEBAR -->
-  <aside id="sidebar" class="w-64 bg-slate-900 flex-shrink-0 flex flex-col min-h-screen">
-    <div class="px-6 py-5 border-b border-slate-700/60">
-      <a href="{% url 'home' %}" class="flex items-center gap-2.5">
-        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-          <i class="fas fa-newspaper text-white text-sm"></i>
-        </div>
-        <span class="text-white font-bold text-lg tracking-tight">CMS Portal</span>
-      </a>
+  <!-- HEADER -->
+  <div class="ma-header">
+    <div>
+      <h1>📋 Manage Articles</h1>
+      <p>City &amp; State News Portal — Content Management</p>
     </div>
-    <nav class="flex-1 p-4 space-y-1">
-      <a href="{% url 'owner_dashboard' %}" class="sidebar-link"><i class="fas fa-house w-4 text-center"></i> Dashboard</a>
-      <a href="{% url 'add_article' %}" class="sidebar-link"><i class="fas fa-pen-to-square w-4 text-center"></i> Add Article</a>
-      <a href="{% url 'manage_articles' %}" class="sidebar-link active"><i class="fas fa-list-ul w-4 text-center"></i> Manage Articles</a>
-      <a href="{% url 'analytics' %}" class="sidebar-link"><i class="fas fa-chart-line w-4 text-center"></i> Analytics</a>
-      <a href="{% url 'admin_analytics' %}" class="sidebar-link"><i class="fas fa-chart-pie w-4 text-center"></i> Admin Analytics</a>
-    </nav>
-    <div class="p-4 border-t border-slate-700/60">
-      <div class="flex items-center gap-3 px-3 py-2">
-        <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-          {{ request.user.first_name|default:"A"|slice:":1"|upper }}
-        </div>
-        <div class="min-w-0">
-          <div class="text-white text-sm font-semibold truncate">{{ request.user.first_name|default:"Admin" }}</div>
-          <div class="text-slate-400 text-xs truncate">{{ request.user.email }}</div>
-        </div>
-      </div>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="flex-1 flex flex-col overflow-hidden">
-
-    <!-- TOP BAR -->
-    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-      <div class="flex items-center gap-3">
-        <button id="sidebarToggle" class="md:hidden text-slate-500 hover:text-indigo-600 transition-colors">
-          <i class="fas fa-bars text-xl"></i>
-        </button>
-        <div>
-          <h1 class="text-xl font-bold text-slate-800">Manage Articles</h1>
-          <p class="text-xs text-slate-400 hidden sm:block">City &amp; State News Portal — Content Management</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-3">
-        <button class="relative has-tip" data-tip="Notifications">
-          <i class="fas fa-bell text-slate-400 hover:text-indigo-600 text-lg transition-colors"></i>
-          <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold">3</span>
-        </button>
-        <a href="{% url 'add_article' %}" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-200 hover:-translate-y-0.5">
-          <i class="fas fa-plus"></i>
-          <span class="hidden sm:inline">Create New Article</span>
-          <span class="sm:hidden">New</span>
-        </a>
-      </div>
-    </header>
-
-    <!-- SCROLLABLE CONTENT -->
-    <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-      <div class="max-w-7xl mx-auto space-y-6">
-
-        <!-- ===== STAT CARDS ===== -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Total Articles -->
-          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-newspaper text-indigo-600 text-xl"></i>
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-slate-800">{{ total_articles }}</div>
-              <div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Total Articles</div>
-            </div>
-          </div>
-          <!-- Total Views -->
-          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 bg-sky-50 rounded-xl flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-eye text-sky-500 text-xl"></i>
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-slate-800">{{ total_views }}</div>
-              <div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Total Views</div>
-            </div>
-          </div>
-          <!-- Published -->
-          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-circle-check text-emerald-500 text-xl"></i>
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-slate-800">{{ published_count }}</div>
-              <div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Published</div>
-            </div>
-          </div>
-          <!-- Draft -->
-          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-pen-ruler text-amber-500 text-xl"></i>
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-slate-800">{{ draft_count }}</div>
-              <div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Drafts</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===== FILTER + SEARCH BAR ===== -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
-          <form method="get" id="filterForm" class="flex flex-wrap gap-3 items-center">
-            <!-- Search -->
-            <div class="relative flex-1 min-w-[200px]">
-              <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-              <input type="text" name="q" value="{{ q }}" placeholder="Search articles..."
-                class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all"
-                id="liveSearch">
-            </div>
-            <!-- Category -->
-            <select name="category" onchange="this.form.submit()"
-              class="py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer">
-              <option value="">All Categories</option>
-              {% for cat in categories %}
-              <option value="{{ cat }}" {% if category == cat %}selected{% endif %}>{{ cat }}</option>
-              {% endfor %}
-            </select>
-            <!-- Status -->
-            <select name="status" onchange="this.form.submit()"
-              class="py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer">
-              <option value="">All Status</option>
-              <option value="published" {% if status == 'published' %}selected{% endif %}>🟢 Published</option>
-              <option value="draft" {% if status == 'draft' %}selected{% endif %}>🟡 Draft</option>
-            </select>
-            <!-- Sort -->
-            <select name="sort" onchange="this.form.submit()"
-              class="py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer">
-              <option value="latest" {% if sort == 'latest' %}selected{% endif %}>⏱ Latest</option>
-              <option value="views" {% if sort == 'views' %}selected{% endif %}>👁 Most Viewed</option>
-              <option value="az" {% if sort == 'az' %}selected{% endif %}>🔤 A–Z</option>
-              <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>📅 Oldest</option>
-            </select>
-            <button type="submit" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors">
-              <i class="fas fa-filter mr-1"></i> Filter
-            </button>
-            {% if q or category or status %}
-            <a href="{% url 'manage_articles' %}" class="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-sm font-medium transition-colors">
-              <i class="fas fa-xmark mr-1"></i> Clear
-            </a>
-            {% endif %}
-          </form>
-        </div>
-
-        <!-- ===== DESKTOP TABLE ===== -->
-        <div class="desktop-table bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <span class="text-sm text-slate-500">
-              Showing <strong class="text-slate-700">{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong class="text-slate-700">{{ page_obj.paginator.count }}</strong> entries
-            </span>
-            <span class="text-xs text-slate-400">
-              {% if q %}<span class="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-medium">Search: "{{ q }}"</span>{% endif %}
-            </span>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full text-left">
-              <thead>
-                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
-                  <th class="px-4 py-3 font-semibold w-12">#</th>
-                  <th class="px-4 py-3 font-semibold">Article</th>
-                  <th class="px-4 py-3 font-semibold">Category</th>
-                  <th class="px-4 py-3 font-semibold">Author</th>
-                  <th class="px-4 py-3 font-semibold">Location</th>
-                  <th class="px-4 py-3 font-semibold">Date</th>
-                  <th class="px-4 py-3 font-semibold text-center">Views</th>
-                  <th class="px-4 py-3 font-semibold text-center">Status</th>
-                  <th class="px-4 py-3 font-semibold text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 text-sm">
-                {% for article in page_obj %}
-                <tr class="art-row transition-colors" style="animation-delay: {{ forloop.counter0 }}0ms">
-                  <!-- # -->
-                  <td class="px-4 py-3 text-slate-400 text-xs font-mono">
-                    {{ forloop.counter|add:page_obj.start_index|add:"-1" }}
-                  </td>
-                  <!-- Article -->
-                  <td class="px-4 py-3">
-                    <div class="flex items-start gap-3">
-                      <!-- Thumbnail -->
-                      <div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-slate-100">
-                        {% with article.media.first as media %}
-                          {% if media and media.media_upload %}
-                            <img src="{{ media.media_upload.url }}" alt="" class="w-full h-full object-cover">
-                          {% else %}
-                            <div class="w-full h-full flex items-center justify-center text-slate-300 text-xl">
-                              <i class="fas fa-image"></i>
-                            </div>
-                          {% endif %}
-                        {% endwith %}
-                      </div>
-                      <div class="min-w-0">
-                        <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
-                          <span class="font-semibold text-slate-800 leading-snug line-clamp-1">{{ article.title|truncatechars:50 }}</span>
-                          {% if article.views_count >= trending_threshold %}
-                          <span class="inline-flex items-center gap-1 text-[10px] bg-orange-50 text-orange-500 px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
-                            <i class="fas fa-arrow-trend-up"></i> Trending
-                          </span>
-                          {% endif %}
-                        </div>
-                        <p class="text-slate-400 text-xs line-clamp-2 leading-relaxed">{{ article.content|truncatechars:90 }}</p>
-                        <div class="text-[10px] text-slate-400 mt-1">Updated {{ article.updated_at|timesince }} ago</div>
-                      </div>
-                    </div>
-                  </td>
-                  <!-- Category -->
-                  <td class="px-4 py-3">
-                    <span class="inline-block px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-semibold">
-                      {{ article.category|default:"General" }}
-                    </span>
-                  </td>
-                  <!-- Author -->
-                  <td class="px-4 py-3">
-                    <a href="#" class="flex items-center gap-2 group">
-                      <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        {{ article.author.first_name|default:"A"|slice:":1"|upper }}
-                      </div>
-                      <span class="text-slate-600 text-xs group-hover:text-indigo-600 transition-colors font-medium">
-                        {{ article.author.first_name|default:article.author.email|truncatechars:16 }}
-                      </span>
-                    </a>
-                  </td>
-                  <!-- Location -->
-                  <td class="px-4 py-3">
-                    <div class="text-xs text-slate-600">
-                      {% if article.city or article.state %}
-                        <i class="fas fa-location-dot text-slate-400 mr-1"></i>
-                        {{ article.city|default:"" }}{% if article.city and article.state %}, {% endif %}{{ article.state|default:"" }}
-                      {% else %}
-                        <span class="text-slate-300">—</span>
-                      {% endif %}
-                    </div>
-                  </td>
-                  <!-- Date -->
-                  <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
-                    <div>{{ article.created_at|date:"M d, Y" }}</div>
-                    <div class="text-slate-400">{{ article.created_at|time:"h:i A" }}</div>
-                  </td>
-                  <!-- Views -->
-                  <td class="px-4 py-3 text-center">
-                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-600">
-                      <i class="fas fa-eye text-slate-400"></i> {{ article.views_count }}
-                    </span>
-                  </td>
-                  <!-- Status -->
-                  <td class="px-4 py-3 text-center">
-                    {% if article.views_count > 0 %}
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold">
-                      <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Published
-                    </span>
-                    {% else %}
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-bold">
-                      <span class="w-1.5 h-1.5 bg-amber-400 rounded-full"></span> Draft
-                    </span>
-                    {% endif %}
-                  </td>
-                  <!-- Actions -->
-                  <td class="px-4 py-3">
-                    <div class="flex items-center justify-center gap-1">
-                      <a href="#" class="has-tip w-8 h-8 flex items-center justify-center rounded-lg bg-sky-50 text-sky-500 hover:bg-sky-100 transition-colors" data-tip="View">
-                        <i class="fas fa-eye text-sm"></i>
-                      </a>
-                      <a href="{% url 'add_article' %}" class="has-tip w-8 h-8 flex items-center justify-center rounded-lg bg-amber-50 text-amber-500 hover:bg-amber-100 transition-colors" data-tip="Edit">
-                        <i class="fas fa-pen text-sm"></i>
-                      </a>
-                      <button onclick="openDeleteModal({{ article.id }}, '{{ article.title|escapejs }}')"
-                        class="has-tip w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors" data-tip="Delete">
-                        <i class="fas fa-trash text-sm"></i>
-                      </button>
-                      <button class="has-tip w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-yellow-50 hover:text-yellow-500 transition-colors bookmark-btn" data-tip="Bookmark" data-id="{{ article.id }}">
-                        <i class="fas fa-star text-sm"></i>
-                      </button>
-                      <button class="has-tip w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-indigo-50 hover:text-indigo-500 transition-colors pin-btn" data-tip="Pin Article" data-id="{{ article.id }}">
-                        <i class="fas fa-thumbtack text-sm"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                {% empty %}
-                <!-- Empty State -->
-                <tr>
-                  <td colspan="9" class="px-6 py-20 text-center">
-                    <div class="flex flex-col items-center gap-4">
-                      <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-inbox text-slate-300 text-4xl"></i>
-                      </div>
-                      <div>
-                        <p class="text-slate-600 font-semibold text-lg mb-1">📭 No articles found</p>
-                        <p class="text-slate-400 text-sm">{% if q %}No results for "{{ q }}". Try a different search.{% else %}Start by creating your first article.{% endif %}</p>
-                      </div>
-                      <a href="{% url 'add_article' %}" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-md hover:-translate-y-0.5">
-                        <i class="fas fa-plus"></i> Create Article
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <!-- PAGINATION -->
-          {% if page_obj.paginator.num_pages > 1 %}
-          <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3">
-            <span class="text-sm text-slate-500">
-              Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> entries
-            </span>
-            <div class="flex items-center gap-1">
-              {% if page_obj.has_previous %}
-              <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}"
-                class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-white text-sm font-medium transition-colors">
-                <i class="fas fa-chevron-left text-xs"></i>
-              </a>
-              {% endif %}
-              {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                <span class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold shadow-sm">{{ num }}</span>
-                {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
-                <a href="?page={{ num }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}"
-                  class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-white text-sm font-medium transition-colors">{{ num }}</a>
-                {% endif %}
-              {% endfor %}
-              {% if page_obj.has_next %}
-              <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}"
-                class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-white text-sm font-medium transition-colors">
-                <i class="fas fa-chevron-right text-xs"></i>
-              </a>
-              {% endif %}
-            </div>
-          </div>
-          {% endif %}
-        </div>
-
-        <!-- ===== MOBILE CARDS ===== -->
-        <div class="mobile-cards space-y-3">
-          {% for article in page_obj %}
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 art-row" style="animation-delay:{{ forloop.counter0 }}0ms">
-            <div class="flex gap-3">
-              <!-- Thumb -->
-              <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100">
-                {% with article.media.first as media %}
-                  {% if media and media.media_upload %}
-                    <img src="{{ media.media_upload.url }}" alt="" class="w-full h-full object-cover">
-                  {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-slate-300 text-2xl">
-                      <i class="fas fa-image"></i>
-                    </div>
-                  {% endif %}
-                {% endwith %}
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-start justify-between gap-2">
-                  <h3 class="font-semibold text-slate-800 text-sm leading-snug line-clamp-2">{{ article.title }}</h3>
-                  {% if article.views_count > 0 %}
-                  <span class="flex-shrink-0 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold">Live</span>
-                  {% else %}
-                  <span class="flex-shrink-0 px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-bold">Draft</span>
-                  {% endif %}
-                </div>
-                <div class="flex flex-wrap gap-2 mt-1.5 text-xs text-slate-500">
-                  <span class="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-semibold">{{ article.category|default:"General" }}</span>
-                  <span><i class="fas fa-eye mr-1 text-slate-400"></i>{{ article.views_count }}</span>
-                  <span><i class="fas fa-calendar mr-1 text-slate-400"></i>{{ article.created_at|date:"M d, Y" }}</span>
-                  {% if article.city %}<span><i class="fas fa-location-dot mr-1 text-slate-400"></i>{{ article.city }}</span>{% endif %}
-                </div>
-                {% if article.views_count >= trending_threshold %}
-                <span class="inline-flex items-center gap-1 text-[10px] bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full font-bold mt-1">
-                  <i class="fas fa-arrow-trend-up"></i> Trending
-                </span>
-                {% endif %}
-              </div>
-            </div>
-            <!-- Mobile Actions -->
-            <div class="flex gap-2 mt-3 pt-3 border-t border-slate-100">
-              <a href="#" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-sky-50 text-sky-600 rounded-xl text-xs font-semibold hover:bg-sky-100 transition-colors">
-                <i class="fas fa-eye"></i> View
-              </a>
-              <a href="{% url 'add_article' %}" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-amber-50 text-amber-600 rounded-xl text-xs font-semibold hover:bg-amber-100 transition-colors">
-                <i class="fas fa-pen"></i> Edit
-              </a>
-              <button onclick="openDeleteModal({{ article.id }}, '{{ article.title|escapejs }}')"
-                class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-red-50 text-red-500 rounded-xl text-xs font-semibold hover:bg-red-100 transition-colors">
-                <i class="fas fa-trash"></i> Delete
-              </button>
-            </div>
-          </div>
-          {% empty %}
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-10 text-center">
-            <i class="fas fa-inbox text-slate-300 text-5xl mb-4 block"></i>
-            <p class="text-slate-600 font-semibold mb-1">📭 No articles found</p>
-            <p class="text-slate-400 text-sm mb-4">{% if q %}No results for "{{ q }}".{% else %}Create your first article.{% endif %}</p>
-            <a href="{% url 'add_article' %}" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors">
-              <i class="fas fa-plus"></i> Create Article
-            </a>
-          </div>
-          {% endfor %}
-
-          <!-- Mobile Pagination -->
-          {% if page_obj.paginator.num_pages > 1 %}
-          <div class="flex items-center justify-between pt-2">
-            <span class="text-xs text-slate-500">{{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
-            <div class="flex gap-2">
-              {% if page_obj.has_previous %}
-              <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}"
-                class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50">← Prev</a>
-              {% endif %}
-              {% if page_obj.has_next %}
-              <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}"
-                class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700">Next →</a>
-              {% endif %}
-            </div>
-          </div>
-          {% endif %}
-        </div>
-
-      </div><!-- end max-w-7xl -->
-    </div><!-- end scrollable -->
-  </main>
-</div><!-- end layout -->
-
-<!-- ===== TOAST NOTIFICATION ===== -->
-<div id="toast" class="fixed bottom-6 right-6 z-[999] hidden">
-  <div class="bg-slate-800 text-white px-5 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2">
-    <i class="fas fa-check-circle text-emerald-400"></i>
-    <span id="toastMsg">Done!</span>
+    <a href="{% url 'add_article' %}" class="ma-new-btn">
+      <i class="fas fa-plus"></i> New Article
+    </a>
   </div>
+
+  <!-- STAT CARDS -->
+  <div class="ma-stats">
+    <div class="ma-stat">
+      <div class="ma-stat-icon navy"><i class="fas fa-newspaper"></i></div>
+      <div><div class="ma-stat-val">{{ total_articles }}</div><div class="ma-stat-lbl">Total Articles</div></div>
+    </div>
+    <div class="ma-stat">
+      <div class="ma-stat-icon red"><i class="fas fa-eye"></i></div>
+      <div><div class="ma-stat-val">{{ total_views }}</div><div class="ma-stat-lbl">Total Views</div></div>
+    </div>
+    <div class="ma-stat">
+      <div class="ma-stat-icon green"><i class="fas fa-circle-check"></i></div>
+      <div><div class="ma-stat-val">{{ published_count }}</div><div class="ma-stat-lbl">Published</div></div>
+    </div>
+    <div class="ma-stat">
+      <div class="ma-stat-icon gold"><i class="fas fa-pen-ruler"></i></div>
+      <div><div class="ma-stat-val">{{ draft_count }}</div><div class="ma-stat-lbl">Drafts</div></div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <form method="get" class="ma-filters">
+    <div class="ma-search-wrap">
+      <i class="fas fa-search"></i>
+      <input type="text" name="q" value="{{ q }}" placeholder="Search articles…">
+    </div>
+    <select name="category" class="ma-select" onchange="this.form.submit()">
+      <option value="">All Categories</option>
+      {% for cat in categories %}
+      <option value="{{ cat }}" {% if category == cat %}selected{% endif %}>{{ cat }}</option>
+      {% endfor %}
+    </select>
+    <select name="status" class="ma-select" onchange="this.form.submit()">
+      <option value="">All Status</option>
+      <option value="published" {% if status == 'published' %}selected{% endif %}>Published</option>
+      <option value="draft"     {% if status == 'draft'     %}selected{% endif %}>Draft</option>
+    </select>
+    <select name="sort" class="ma-select" onchange="this.form.submit()">
+      <option value="latest"  {% if sort == 'latest'  %}selected{% endif %}>Latest</option>
+      <option value="views"   {% if sort == 'views'   %}selected{% endif %}>Most Viewed</option>
+      <option value="az"      {% if sort == 'az'      %}selected{% endif %}>A–Z</option>
+      <option value="oldest"  {% if sort == 'oldest'  %}selected{% endif %}>Oldest</option>
+    </select>
+    <button type="submit" class="ma-filter-btn"><i class="fas fa-filter"></i> Filter</button>
+    {% if q or category or status %}
+    <a href="{% url 'manage_articles' %}" class="ma-clear-btn"><i class="fas fa-xmark"></i> Clear</a>
+    {% endif %}
+  </form>
+
+  <!-- TABLE -->
+  <div class="ma-table-card">
+    <div class="ma-table-top">
+      <span>Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> articles</span>
+      {% if q %}<span style="background:rgba(230,57,70,.08);color:var(--red);padding:2px 10px;border-radius:99px;font-size:.75rem;font-weight:700;">Search: "{{ q }}"</span>{% endif %}
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Article</th>
+            <th>Category</th>
+            <th class="desktop-only">Author</th>
+            <th class="desktop-only">Location</th>
+            <th class="desktop-only">Date</th>
+            <th style="text-align:center;">Views</th>
+            <th style="text-align:center;">Status</th>
+            <th style="text-align:center;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for article in page_obj %}
+          <tr>
+            <td style="color:var(--text-muted);font-size:.75rem;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:.75rem;">
+                <div class="art-thumb">
+                  {% with article.media.first as m %}
+                    {% if m and m.media_upload %}<img src="{{ m.media_upload.url }}" alt="">
+                    {% else %}<i class="fas fa-image"></i>{% endif %}
+                  {% endwith %}
+                </div>
+                <div>
+                  <div style="font-weight:700;color:var(--text);line-height:1.3;margin-bottom:.2rem;">
+                    {{ article.title|truncatechars:48 }}
+                    {% if article.views_count >= trending_threshold %}
+                    <span class="trend-badge"><i class="fas fa-arrow-trend-up"></i> Trending</span>
+                    {% endif %}
+                  </div>
+                  <div style="font-size:.75rem;color:var(--text-muted);">{{ article.content|truncatechars:70 }}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="cat-badge">{{ article.category|default:"General" }}</span></td>
+            <td class="desktop-only">
+              <div class="author-chip">
+                <div class="author-av">{{ article.author.first_name|default:"A"|slice:":1"|upper }}</div>
+                {{ article.author.first_name|default:article.author.email|truncatechars:14 }}
+              </div>
+            </td>
+            <td class="desktop-only" style="font-size:.78rem;color:var(--text-muted);">
+              {% if article.city or article.state %}
+                <i class="fas fa-location-dot" style="color:var(--red);margin-right:3px;"></i>
+                {{ article.city|default:"" }}{% if article.city and article.state %}, {% endif %}{{ article.state|default:"" }}
+              {% else %}—{% endif %}
+            </td>
+            <td class="desktop-only" style="font-size:.78rem;color:var(--text-muted);white-space:nowrap;">
+              {{ article.created_at|date:"M d, Y" }}<br>
+              <span style="font-size:.7rem;">{{ article.created_at|time:"h:i A" }}</span>
+            </td>
+            <td style="text-align:center;font-size:.8rem;font-weight:700;">{{ article.views_count }}</td>
+            <td style="text-align:center;">
+              {% if article.views_count > 0 %}
+                <span class="status-pub">Published</span>
+              {% else %}
+                <span class="status-draft">Draft</span>
+              {% endif %}
+            </td>
+            <td style="text-align:center;">
+              <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;">
+                <a href="{% url 'article_detail' article.id %}" class="act-btn view" title="View"><i class="fas fa-eye"></i></a>
+                <a href="{% url 'add_article' %}" class="act-btn edit" title="Edit"><i class="fas fa-pen"></i></a>
+                <a href="{% url 'bookmark_article' article.id %}" class="act-btn" title="Bookmark" style="background:rgba(245,158,11,.1);color:#d97706;"><i class="fas fa-bookmark"></i></a>
+                <button class="act-btn" title="Pin" style="background:rgba(29,78,216,.1);color:var(--blue);" onclick="pinArticle({{ article.id }}, this)"><i class="fas fa-thumbtack"></i></button>
+                <button onclick="openDeleteModal({{ article.id }}, '{{ article.title|escapejs }}')" class="act-btn delete" title="Delete"><i class="fas fa-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9">
+              <div class="ma-empty">
+                <i class="fas fa-inbox"></i>
+                <p style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">No articles found</p>
+                <p style="font-size:.875rem;margin-bottom:1.25rem;">{% if q %}No results for "{{ q }}".{% else %}Start by creating your first article.{% endif %}</p>
+                <a href="{% url 'add_article' %}" class="ma-new-btn" style="display:inline-flex;">
+                  <i class="fas fa-plus"></i> Create Article
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="ma-pagination">
+      <span class="pg-info">Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong></span>
+      <div class="pg-btns">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}" class="pg-btn"><i class="fas fa-chevron-left" style="font-size:.7rem;"></i></a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <span class="pg-btn active">{{ num }}</span>
+          {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+            <a href="?page={{ num }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}" class="pg-btn">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&category={{ category }}&status={{ status }}&sort={{ sort }}" class="pg-btn"><i class="fas fa-chevron-right" style="font-size:.7rem;"></i></a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
 </div>
 
 <script>
-// ===== DELETE MODAL =====
 function openDeleteModal(id, title) {
-  document.getElementById('deleteModalMsg').textContent = `Delete "${title}"? This cannot be undone.`;
-  document.getElementById('deleteForm').action = `/news/delete-article/${id}/`;
+  document.getElementById('deleteModalMsg').textContent = 'Delete "' + title + '"? This cannot be undone.';
+  document.getElementById('deleteForm').action = '/news/delete-article/' + id + '/';
   document.getElementById('deleteModal').classList.add('open');
 }
 function closeDeleteModal() {
@@ -503,54 +456,11 @@ function closeDeleteModal() {
 document.getElementById('deleteModal').addEventListener('click', function(e) {
   if (e.target === this) closeDeleteModal();
 });
-
-// ===== LIVE SEARCH (debounced) =====
-let searchTimer;
-document.getElementById('liveSearch').addEventListener('input', function() {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    document.getElementById('filterForm').submit();
-  }, 500);
-});
-
-// ===== TOAST =====
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  document.getElementById('toastMsg').textContent = msg;
-  t.classList.remove('hidden');
-  setTimeout(() => t.classList.add('hidden'), 2800);
+function pinArticle(id, btn) {
+  btn.style.background = 'rgba(230,57,70,.15)';
+  btn.style.color = 'var(--red)';
+  btn.title = 'Pinned';
+  btn.querySelector('i').className = 'fas fa-thumbtack';
 }
-
-// ===== BOOKMARK TOGGLE =====
-document.querySelectorAll('.bookmark-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const icon = this.querySelector('i');
-    const isActive = icon.classList.contains('text-yellow-500');
-    icon.classList.toggle('text-yellow-500', !isActive);
-    icon.classList.toggle('text-slate-400', isActive);
-    this.classList.toggle('bg-yellow-50', !isActive);
-    this.classList.toggle('bg-slate-50', isActive);
-    showToast(isActive ? 'Bookmark removed' : '⭐ Article bookmarked');
-  });
-});
-
-// ===== PIN TOGGLE =====
-document.querySelectorAll('.pin-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const icon = this.querySelector('i');
-    const isActive = icon.classList.contains('text-indigo-500');
-    icon.classList.toggle('text-indigo-500', !isActive);
-    icon.classList.toggle('text-slate-400', isActive);
-    this.classList.toggle('bg-indigo-50', !isActive);
-    this.classList.toggle('bg-slate-50', isActive);
-    showToast(isActive ? 'Article unpinned' : '📌 Article pinned as featured');
-  });
-});
-
-// ===== MOBILE SIDEBAR TOGGLE =====
-document.getElementById('sidebarToggle')?.addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('hidden-mobile');
-});
 </script>
-</body>
-</html>
+{% endblock %}

@@ -2,6 +2,13 @@
 {% load static %}
 {% block title %}Reader Panel | The Daily Portal{% endblock %}
 
+{% block city_options %}
+  {% for city in cities %}<option value="{{ city }}">{{ city }}</option>{% endfor %}
+{% endblock %}
+{% block state_options %}
+  {% for state in states %}<option value="{{ state }}">{{ state }}</option>{% endfor %}
+{% endblock %}
+
 {% block content %}
 <style>
 /* ===== READER PANEL VARIABLES ===== */

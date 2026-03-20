@@ -3,11 +3,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import F, Count, Q, ExpressionWrapper, FloatField, Sum
 from django.http import JsonResponse
+from django.core.cache import cache
 from core.models import User
 from .models import Article, FakeNewsReport, AdPayment, Reaction, Comment, Bookmark, ReadingHistory
+import urllib.request, json, urllib.parse
 
 def owner_dashboard(request):
-    return render(request, 'owner_dashboard.html')
+    cities = Article.objects.values_list('city',  flat=True).distinct().exclude(city__isnull=True).exclude(city='')
+    states = Article.objects.values_list('state', flat=True).distinct().exclude(state__isnull=True).exclude(state='')
+    return render(request, 'owner_dashboard.html', {'cities': cities, 'states': states})
 
 def user_dashboard(request):
     latest_news = Article.objects.order_by('-created_at')[:6]
@@ -66,6 +70,8 @@ def user_dashboard(request):
         bookmarked_ids = set(Bookmark.objects.filter(user=request.user).values_list('article_id', flat=True))
 
     categories = Article.objects.values_list('category', flat=True).distinct().exclude(category__isnull=True)
+    cities     = Article.objects.values_list('city',     flat=True).distinct().exclude(city__isnull=True).exclude(city='')
+    states     = Article.objects.values_list('state',    flat=True).distinct().exclude(state__isnull=True).exclude(state='')
 
     context = {
         'latest_news': latest_news,
@@ -80,6 +86,8 @@ def user_dashboard(request):
         'articles_read_count': articles_read_count,
         'bookmarked_ids': bookmarked_ids,
         'categories': categories,
+        'cities':     cities,
+        'states':     states,
     }
     return render(request, 'user_dashboard.html', context)
 
@@ -125,9 +133,121 @@ def reader_search(request):
         })
     return JsonResponse({'articles': data})
 
+# ── Live News Page ─────────────────────────────────────────────────────────────
+GNEWS_API_KEY = 'YOUR_GNEWS_API_KEY'   # replace with real key from gnews.io
+FALLBACK_IMG  = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600'
+
+def _fetch_gnews(query='India', category='', max_results=12):
+    """Fetch from GNews API with 5-min cache."""
+    cache_key = f'gnews_{query}_{category}_{max_results}'
+    cached    = cache.get(cache_key)
+    if cached:
+        return cached
+
+    try:
+        params = {
+            'q':        query,
+            'lang':     'en',
+            'country':  'in',
+            'max':      max_results,
+            'apikey':   GNEWS_API_KEY,
+        }
+        if category:
+            params['topic'] = category
+        url  = 'https://gnews.io/api/v4/search?' + urllib.parse.urlencode(params)
+        with urllib.request.urlopen(url, timeout=6) as r:
+            data = json.loads(r.read())
+        articles = data.get('articles', [])
+        cache.set(cache_key, articles, 300)   # cache 5 minutes
+        return articles
+    except Exception:
+        return []
+
+
+def live_news(request):
+    category = request.GET.get('category', '')
+    city     = request.GET.get('city', 'India')
+    query    = city if city else 'India'
+
+    external = _fetch_gnews(query=query, category=category, max_results=12)
+
+    # Also pull internal DB articles
+    internal_qs = Article.objects.prefetch_related('media').order_by('-created_at')
+    if city and city != 'India':
+        internal_qs = internal_qs.filter(Q(city__icontains=city) | Q(state__icontains=city))
+    if category:
+        internal_qs = internal_qs.filter(category__icontains=category)
+    internal = list(internal_qs[:6])
+
+    cities  = Article.objects.values_list('city',  flat=True).distinct().exclude(city__isnull=True).exclude(city='')
+    states  = Article.objects.values_list('state', flat=True).distinct().exclude(state__isnull=True).exclude(state='')
+
+    categories = ['business', 'sports', 'technology', 'health', 'politics', 'entertainment']
+
+    context = {
+        'external':    external,
+        'internal':    internal,
+        'cities':      cities,
+        'states':      states,
+        'categories':  categories,
+        'active_cat':  category,
+        'active_city': city,
+        'fallback_img': FALLBACK_IMG,
+    }
+    return render(request, 'live_news.html', context)
+
+
+def live_news_api(request):
+    """AJAX endpoint — returns fresh external news as JSON."""
+    category = request.GET.get('category', '')
+    city     = request.GET.get('city', 'India')
+    articles = _fetch_gnews(query=city or 'India', category=category, max_results=12)
+    return JsonResponse({'articles': articles, 'fallback': FALLBACK_IMG})
+
+
 def add_article(request):
-    # This view will just return the add_article template for now.
-    return render(request, 'add_article.html')
+    from .models import Article
+    default_cats = ['Politics', 'Sports', 'Technology', 'Business', 'Entertainment', 'Education', 'Health', 'Crime', 'Weather', 'Jobs', 'Events']
+    db_cats = list(Article.objects.values_list('category', flat=True).distinct().exclude(category__isnull=True).exclude(category=''))
+    db_cats_lower = [c.lower() for c in db_cats]
+    for d in default_cats:
+        if d.lower() not in db_cats_lower:
+            db_cats.append(d)
+    categories = db_cats
+    cities = list(Article.objects.values_list('city', flat=True).distinct().exclude(city__isnull=True).exclude(city=''))
+    states = list(Article.objects.values_list('state', flat=True).distinct().exclude(state__isnull=True).exclude(state=''))
+    default_states = ['Gujarat', 'Maharashtra', 'Rajasthan', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Uttar Pradesh', 'West Bengal', 'Punjab', 'Madhya Pradesh']
+    states_lower = [s.lower() for s in states]
+    for s in default_states:
+        if s.lower() not in states_lower:
+            states.append(s)
+
+    if request.method == 'POST':
+        title       = request.POST.get('title', '').strip()
+        content     = request.POST.get('content', '').strip()
+        category    = request.POST.get('category', '').strip()
+        city        = request.POST.get('city', '').strip()
+        state       = request.POST.get('state', '').strip()
+
+        if title and content:
+            author = request.user if request.user.is_authenticated else None
+            if author:
+                Article.objects.create(
+                    title=title,
+                    content=content,
+                    category=category or None,
+                    city=city or None,
+                    state=state or None,
+                    author=author,
+                )
+                messages.success(request, 'Article published successfully.')
+                return redirect('manage_articles')
+            else:
+                messages.error(request, 'You must be logged in to publish an article.')
+        else:
+            messages.error(request, 'Title and content are required.')
+
+    return render(request, 'add_article.html', {'categories': categories, 'cities': cities, 'states': states})
 
 from .forms import PaymentForm
 
@@ -186,7 +306,7 @@ def manage_articles(request):
 
     context = {
         'page_obj':          page_obj,
-        'articles':          page_obj,          # alias for template
+        'articles':          page_obj,
         'total_articles':    total_articles,
         'total_views':       total_views,
         'published_count':   published_count,
@@ -197,6 +317,8 @@ def manage_articles(request):
         'category': category,
         'status':   status,
         'sort':     sort,
+        'cities':   Article.objects.values_list('city', flat=True).distinct().exclude(city__isnull=True).exclude(city=''),
+        'states':   Article.objects.values_list('state', flat=True).distinct().exclude(state__isnull=True).exclude(state=''),
     }
     return render(request, 'manage_articles.html', context)
 
@@ -205,12 +327,15 @@ def analytics(request):
     total_articles = Article.objects.count()
     avg_views = total_views // total_articles if total_articles > 0 else 0
     top_articles = Article.objects.order_by('-views_count')[:5]
-    
+    cities = Article.objects.values_list('city', flat=True).distinct().exclude(city__isnull=True).exclude(city='')
+    states = Article.objects.values_list('state', flat=True).distinct().exclude(state__isnull=True).exclude(state='')
     context = {
         'total_views': total_views,
         'total_articles': total_articles,
         'avg_views': avg_views,
         'top_articles': top_articles,
+        'cities': cities,
+        'states': states,
     }
     return render(request, 'analytics.html', context)
 
@@ -224,6 +349,9 @@ def admin_analytics_dashboard(request):
     revenue_dict = AdPayment.objects.filter(status='Completed').aggregate(total_rev=Sum('amount'))
     total_revenue = revenue_dict['total_rev'] or 0
 
+    cities  = Article.objects.values_list('city',  flat=True).distinct().exclude(city__isnull=True).exclude(city='')
+    states  = Article.objects.values_list('state', flat=True).distinct().exclude(state__isnull=True).exclude(state='')
+
     context = {
         'total_articles': total_articles,
         'total_users': total_users,
@@ -231,6 +359,8 @@ def admin_analytics_dashboard(request):
         'total_reactions': total_reactions,
         'active_ads': active_ads,
         'total_revenue': total_revenue,
+        'cities': cities,
+        'states': states,
     }
     return render(request, 'admin_analytics.html', context)
 
