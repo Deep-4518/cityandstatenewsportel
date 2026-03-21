@@ -3,419 +3,300 @@
     "model": "news.article",
     "pk": 1,
     "fields": {
-      "title": "Ahmedabad Sees Heavy Rainfall",
-      "content": "Heavy rainfall caused waterlogging in many areas of Ahmedabad. Residents were advised to stay indoors as the city administration deployed pumps to clear the flooded streets.",
-      "category": "Local News",
+      "title": "Ahmedabad Metro Expansion Update",
+      "content": "Metro routes are expanding to new areas improving connectivity.",
+      "category": "City",
       "city": "Ahmedabad",
       "state": "Gujarat",
       "author": 1,
       "views_count": 120,
-      "created_at": "2026-03-20T10:00:00Z",
-      "updated_at": "2026-03-20T10:00:00Z"
+      "created_at": "2026-01-01T10:00:00Z",
+      "updated_at": "2026-01-01T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 2,
     "fields": {
-      "title": "New Jobs Announced in Surat",
-      "content": "Multiple IT companies have announced hiring drives for freshers in Surat. Over 500 positions are open across software development, data analytics, and customer support roles.",
-      "category": "Jobs",
+      "title": "Surat Clean City Mission Success",
+      "content": "Surat ranks among the cleanest cities in India.",
+      "category": "City",
       "city": "Surat",
       "state": "Gujarat",
       "author": 1,
-      "views_count": 80,
-      "created_at": "2026-03-20T11:00:00Z",
-      "updated_at": "2026-03-20T11:00:00Z"
+      "views_count": 140,
+      "created_at": "2026-01-02T10:00:00Z",
+      "updated_at": "2026-01-02T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 3,
     "fields": {
-      "title": "Gujarat Budget 2026: Education Gets Major Boost",
-      "content": "The Gujarat state budget for 2026 has allocated a record Rs 18,000 crore for education. New schools, digital classrooms, and scholarship programs are among the key announcements.",
-      "category": "Politics",
+      "title": "Gujarat Budget 2026 Highlights",
+      "content": "Major allocations announced for infrastructure and education.",
+      "category": "State",
       "city": "Gandhinagar",
       "state": "Gujarat",
       "author": 1,
-      "views_count": 210,
-      "created_at": "2026-03-19T09:00:00Z",
-      "updated_at": "2026-03-19T09:00:00Z"
+      "views_count": 200,
+      "created_at": "2026-01-03T10:00:00Z",
+      "updated_at": "2026-01-03T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 4,
     "fields": {
-      "title": "Mumbai Metro Line 3 Fully Operational",
-      "content": "Mumbai's Metro Line 3 (Aqua Line) is now fully operational, connecting Colaba to SEEPZ. The underground corridor is expected to reduce road traffic by 20% during peak hours.",
-      "category": "Infrastructure",
+      "title": "Maharashtra New Industrial Policy",
+      "content": "Government focuses on boosting manufacturing sector.",
+      "category": "State",
       "city": "Mumbai",
       "state": "Maharashtra",
       "author": 1,
-      "views_count": 340,
-      "created_at": "2026-03-18T08:30:00Z",
-      "updated_at": "2026-03-18T08:30:00Z"
+      "views_count": 180,
+      "created_at": "2026-01-04T10:00:00Z",
+      "updated_at": "2026-01-04T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 5,
     "fields": {
-      "title": "Pune Startup Raises Rs 50 Crore in Series A",
-      "content": "A Pune-based agritech startup has raised Rs 50 crore in a Series A funding round led by a prominent venture capital firm. The funds will be used to expand operations across Maharashtra and Gujarat.",
-      "category": "Business",
-      "city": "Pune",
-      "state": "Maharashtra",
+      "title": "Election Rally Updates 2026",
+      "content": "Political leaders gather huge crowds ahead of elections.",
+      "category": "Politics",
+      "city": "Delhi",
+      "state": "Delhi",
       "author": 1,
-      "views_count": 95,
-      "created_at": "2026-03-17T14:00:00Z",
-      "updated_at": "2026-03-17T14:00:00Z"
+      "views_count": 300,
+      "created_at": "2026-01-05T10:00:00Z",
+      "updated_at": "2026-01-05T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 6,
     "fields": {
-      "title": "Rajkot Road Repair Drive Begins",
-      "content": "The Rajkot Municipal Corporation has launched a city-wide road repair drive targeting over 200 km of damaged roads. The project is expected to be completed within 60 days.",
-      "category": "Local News",
-      "city": "Rajkot",
-      "state": "Gujarat",
+      "title": "New Policies Debate in Parliament",
+      "content": "Opposition raises concerns over new bills.",
+      "category": "Politics",
+      "city": "Delhi",
+      "state": "Delhi",
       "author": 1,
-      "views_count": 55,
-      "created_at": "2026-03-16T10:00:00Z",
-      "updated_at": "2026-03-16T10:00:00Z"
+      "views_count": 250,
+      "created_at": "2026-01-06T10:00:00Z",
+      "updated_at": "2026-01-06T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 7,
     "fields": {
-      "title": "India Wins T20 Series Against Australia",
-      "content": "India clinched the T20 series 3-1 against Australia in a thrilling final match at Ahmedabad's Narendra Modi Stadium. Virat Kohli was named Player of the Series.",
+      "title": "India Wins ODI Series",
+      "content": "Team India dominates with excellent performance.",
       "category": "Sports",
-      "city": "Ahmedabad",
-      "state": "Gujarat",
+      "city": "Mumbai",
+      "state": "Maharashtra",
       "author": 1,
-      "views_count": 480,
-      "created_at": "2026-03-15T20:00:00Z",
-      "updated_at": "2026-03-15T20:00:00Z"
+      "views_count": 400,
+      "created_at": "2026-01-07T10:00:00Z",
+      "updated_at": "2026-01-07T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 8,
     "fields": {
-      "title": "Maharashtra Launches Free Health Camps in Rural Areas",
-      "content": "The Maharashtra government has launched a series of free health camps across 500 villages. Services include blood tests, eye checkups, and dental care, benefiting over 2 lakh residents.",
-      "category": "Health",
-      "city": "Nashik",
-      "state": "Maharashtra",
+      "title": "IPL 2026 Auction Highlights",
+      "content": "Top players sold at record prices.",
+      "category": "Sports",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
       "author": 1,
-      "views_count": 130,
-      "created_at": "2026-03-14T07:00:00Z",
-      "updated_at": "2026-03-14T07:00:00Z"
+      "views_count": 420,
+      "created_at": "2026-01-08T10:00:00Z",
+      "updated_at": "2026-01-08T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 9,
     "fields": {
-      "title": "Heavy Rain Disrupts Life in Ahmedabad",
-      "content": "Continuous rainfall across Ahmedabad on Thursday caused waterlogging in major areas like CG Road and Satellite. Traffic congestion was reported during peak hours, and municipal teams were deployed to clear blocked drainage systems. Residents are advised to avoid unnecessary travel as more rain is expected in the coming days.",
-      "category": "Local News",
-      "city": "Ahmedabad",
-      "state": "Gujarat",
+      "title": "Top Government Jobs 2026",
+      "content": "New job openings announced in multiple sectors.",
+      "category": "Jobs",
+      "city": "Delhi",
+      "state": "Delhi",
       "author": 1,
-      "views_count": 310,
-      "created_at": "2026-03-13T08:00:00Z",
-      "updated_at": "2026-03-13T08:00:00Z"
+      "views_count": 260,
+      "created_at": "2026-01-09T10:00:00Z",
+      "updated_at": "2026-01-09T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 10,
     "fields": {
-      "title": "IT Companies in Surat Announce 500+ Job Openings",
-      "content": "Several IT companies in Surat have announced over 500 job openings for fresh graduates and experienced professionals. Positions include software developers, data analysts, and support engineers. Walk-in interviews are scheduled next week at the Surat IT Park. Candidates are advised to carry updated resumes and relevant certificates.",
+      "title": "IT Sector Hiring Boom",
+      "content": "Tech companies are hiring aggressively in 2026.",
       "category": "Jobs",
-      "city": "Surat",
-      "state": "Gujarat",
+      "city": "Bangalore",
+      "state": "Karnataka",
       "author": 1,
-      "views_count": 245,
-      "created_at": "2026-03-12T10:00:00Z",
-      "updated_at": "2026-03-12T10:00:00Z"
+      "views_count": 300,
+      "created_at": "2026-01-10T10:00:00Z",
+      "updated_at": "2026-01-10T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 11,
     "fields": {
-      "title": "Police Crack Down on Illegal Activities in Rajkot",
-      "content": "Rajkot police conducted a late-night raid targeting illegal gambling and betting operations across three locations in the city. Several individuals were arrested and authorities seized cash worth Rs 4 lakh along with electronic devices used for online betting. Investigations are ongoing and more arrests are expected.",
-      "category": "Crime",
-      "city": "Rajkot",
+      "title": "Navratri Festival Begins",
+      "content": "Gujarat celebrates with grand Garba nights.",
+      "category": "Events",
+      "city": "Vadodara",
       "state": "Gujarat",
       "author": 1,
-      "views_count": 190,
-      "created_at": "2026-03-11T22:00:00Z",
-      "updated_at": "2026-03-11T22:00:00Z"
+      "views_count": 500,
+      "created_at": "2026-01-11T10:00:00Z",
+      "updated_at": "2026-01-11T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 12,
     "fields": {
-      "title": "Gujarat Board Announces Exam Schedule 2026",
-      "content": "The Gujarat Secondary and Higher Secondary Education Board (GSEB) has released the exam timetable for 2026. Exams will begin in March for Class 10 and Class 12 students. Students are advised to check the official GSEB website for detailed schedules and admit card download instructions. Special preparation camps are being organized in rural areas.",
-      "category": "Education",
-      "city": "Gandhinagar",
-      "state": "Gujarat",
+      "title": "Diwali Celebration Guide",
+      "content": "Top places to celebrate Diwali across India.",
+      "category": "Events",
+      "city": "Jaipur",
+      "state": "Rajasthan",
       "author": 1,
-      "views_count": 420,
-      "created_at": "2026-03-10T09:00:00Z",
-      "updated_at": "2026-03-10T09:00:00Z"
+      "views_count": 480,
+      "created_at": "2026-01-12T10:00:00Z",
+      "updated_at": "2026-01-12T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 13,
     "fields": {
-      "title": "India Wins T20 Series 3-1 Against Australia",
-      "content": "Team India secured a dominant 3-1 victory in the T20 series against Australia. The final match at Wankhede Stadium saw an outstanding performance by Indian bowlers, restricting Australia to just 142 runs. Jasprit Bumrah took 3 wickets while Hardik Pandya played a match-winning knock of 67 runs off 38 balls.",
-      "category": "Sports",
+      "title": "Sensex Hits New High",
+      "content": "Stock market reaches all-time high levels.",
+      "category": "Business",
       "city": "Mumbai",
       "state": "Maharashtra",
       "author": 1,
-      "views_count": 560,
-      "created_at": "2026-03-09T20:00:00Z",
-      "updated_at": "2026-03-09T20:00:00Z"
+      "views_count": 600,
+      "created_at": "2026-01-13T10:00:00Z",
+      "updated_at": "2026-01-13T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 14,
     "fields": {
-      "title": "New Development Projects Announced in Gujarat",
-      "content": "The Gujarat state government has announced new infrastructure projects including road expansions, flyovers, and smart city initiatives across 10 major cities. The projects worth Rs 12,000 crore aim to boost economic growth and improve public facilities. Chief Minister emphasized that these projects will generate over 50,000 direct employment opportunities.",
-      "category": "Politics",
-      "city": "Ahmedabad",
-      "state": "Gujarat",
+      "title": "Startup Ecosystem Growth",
+      "content": "India sees rapid startup growth in tech industry.",
+      "category": "Business",
+      "city": "Bangalore",
+      "state": "Karnataka",
       "author": 1,
-      "views_count": 275,
-      "created_at": "2026-03-08T11:00:00Z",
-      "updated_at": "2026-03-08T11:00:00Z"
+      "views_count": 550,
+      "created_at": "2026-01-14T10:00:00Z",
+      "updated_at": "2026-01-14T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 15,
     "fields": {
-      "title": "Startup Ecosystem Growing Rapidly in Ahmedabad",
-      "content": "Ahmedabad is emerging as a major startup hub with increasing investments in tech, fintech, and agritech sectors. Over 200 startups have been registered in the past year, with several receiving funding from national and international investors. The Gujarat government's startup policy has played a key role in attracting entrepreneurs from across India.",
-      "category": "Business",
-      "city": "Ahmedabad",
-      "state": "Gujarat",
+      "title": "New Education Policy Explained",
+      "content": "Major reforms introduced in Indian education.",
+      "category": "Education",
+      "city": "Delhi",
+      "state": "Delhi",
       "author": 1,
-      "views_count": 185,
-      "created_at": "2026-03-07T14:00:00Z",
-      "updated_at": "2026-03-07T14:00:00Z"
+      "views_count": 350,
+      "created_at": "2026-01-15T10:00:00Z",
+      "updated_at": "2026-01-15T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 16,
     "fields": {
-      "title": "Cultural Festival Attracts Thousands in Vadodara",
-      "content": "A grand cultural festival showcasing traditional Gujarati dance, music, and food attracted over 50,000 visitors to Vadodara over three days. The event featured performances by renowned folk artists and exhibitions of local handicrafts. The festival boosted local tourism and small businesses, with vendors reporting record sales.",
-      "category": "Events",
-      "city": "Vadodara",
-      "state": "Gujarat",
+      "title": "Online Learning Trends",
+      "content": "Students prefer online courses in 2026.",
+      "category": "Education",
+      "city": "Pune",
+      "state": "Maharashtra",
       "author": 1,
-      "views_count": 320,
-      "created_at": "2026-03-06T10:00:00Z",
-      "updated_at": "2026-03-06T10:00:00Z"
+      "views_count": 330,
+      "created_at": "2026-01-16T10:00:00Z",
+      "updated_at": "2026-01-16T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 17,
     "fields": {
-      "title": "Temperature Drops Across Gujarat Due to Cold Wave",
-      "content": "A sudden drop in temperature has been recorded across Gujarat with Ahmedabad recording its lowest temperature of the season at 11 degrees Celsius. The India Meteorological Department has issued a cold wave advisory for the next 48 hours. Authorities have set up night shelters for homeless individuals and the elderly are advised to take precautions.",
-      "category": "Weather",
-      "city": "Ahmedabad",
-      "state": "Gujarat",
+      "title": "AI Becomes Global Trend",
+      "content": "Artificial Intelligence dominates tech industry.",
+      "category": "Trending",
+      "city": "Global",
+      "state": "Global",
       "author": 1,
-      "views_count": 150,
-      "created_at": "2026-03-05T07:00:00Z",
-      "updated_at": "2026-03-05T07:00:00Z"
+      "views_count": 800,
+      "created_at": "2026-01-17T10:00:00Z",
+      "updated_at": "2026-01-17T10:00:00Z"
     }
   },
   {
     "model": "news.article",
     "pk": 18,
     "fields": {
-      "title": "Major Traffic Diversions Announced in Ahmedabad",
-      "content": "Due to ongoing metro construction work on the Phase 2 corridor, several major roads in Ahmedabad including SG Highway, Ashram Road, and Navrangpura will remain closed or diverted for the next 30 days. The Ahmedabad Municipal Corporation has issued detailed diversion maps. Commuters are advised to plan alternative routes and allow extra travel time.",
-      "category": "Local News",
+      "title": "Social Media Viral News",
+      "content": "New viral content takes over internet.",
+      "category": "Trending",
+      "city": "Global",
+      "state": "Global",
+      "author": 1,
+      "views_count": 780,
+      "created_at": "2026-01-18T10:00:00Z",
+      "updated_at": "2026-01-18T10:00:00Z"
+    }
+  },
+  {
+    "model": "news.article",
+    "pk": 19,
+    "fields": {
+      "title": "Live Rain Alert Gujarat",
+      "content": "Heavy rainfall expected in multiple districts.",
+      "category": "Live",
       "city": "Ahmedabad",
       "state": "Gujarat",
       "author": 1,
-      "views_count": 200,
-      "created_at": "2026-03-04T09:00:00Z",
-      "updated_at": "2026-03-04T09:00:00Z"
+      "views_count": 900,
+      "created_at": "2026-01-19T10:00:00Z",
+      "updated_at": "2026-01-19T10:00:00Z"
     }
   },
   {
-    "model": "news.articlemedia",
-    "pk": 1,
+    "model": "news.article",
+    "pk": 20,
     "fields": {
-      "article": 1,
-      "media_type": "Image",
-      "media_upload": null,
-      "media_url": "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=800",
-      "uploaded_date": "2026-03-20T10:10:00Z"
-    }
-  },
-  {
-    "model": "news.articlemedia",
-    "pk": 2,
-    "fields": {
-      "article": 4,
-      "media_type": "Image",
-      "media_upload": null,
-      "media_url": "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800",
-      "uploaded_date": "2026-03-18T08:35:00Z"
-    }
-  },
-  {
-    "model": "news.reaction",
-    "pk": 1,
-    "fields": {
-      "user": 1,
-      "article": 1,
-      "reaction_type": "Like",
-      "rating": 5
-    }
-  },
-  {
-    "model": "news.reaction",
-    "pk": 2,
-    "fields": {
-      "user": 1,
-      "article": 7,
-      "reaction_type": "Love",
-      "rating": 5
-    }
-  },
-  {
-    "model": "news.comment",
-    "pk": 1,
-    "fields": {
-      "user": 1,
-      "article": 1,
-      "comment_text": "Very informative news! Stay safe everyone.",
-      "comment_date": "2026-03-20T10:30:00Z",
-      "status": "Visible"
-    }
-  },
-  {
-    "model": "news.comment",
-    "pk": 2,
-    "fields": {
-      "user": 1,
-      "article": 7,
-      "comment_text": "What a match! India played brilliantly.",
-      "comment_date": "2026-03-15T21:00:00Z",
-      "status": "Visible"
-    }
-  },
-  {
-    "model": "news.newstip",
-    "pk": 1,
-    "fields": {
-      "submitted_by": 1,
-      "title": "Road Damage in Rajkot",
-      "description": "Major potholes causing traffic issues near the main market.",
-      "location": "Rajkot",
-      "status": "Pending",
-      "created_at": "2026-03-20T09:00:00Z"
-    }
-  },
-  {
-    "model": "news.bookmark",
-    "pk": 1,
-    "fields": {
-      "user": 1,
-      "article": 1,
-      "created_at": "2026-03-20T10:45:00Z"
-    }
-  },
-  {
-    "model": "news.bookmark",
-    "pk": 2,
-    "fields": {
-      "user": 1,
-      "article": 7,
-      "created_at": "2026-03-15T22:00:00Z"
-    }
-  },
-  {
-    "model": "news.fakenewsreport",
-    "pk": 1,
-    "fields": {
-      "user": 1,
-      "article": 2,
-      "reason": "Seems misleading — company names not verified.",
-      "status": "Pending",
-      "created_at": "2026-03-20T12:00:00Z"
-    }
-  },
-  {
-    "model": "news.readinghistory",
-    "pk": 1,
-    "fields": {
-      "user": 1,
-      "article": 1,
-      "read_at": "2026-03-20T11:30:00Z"
-    }
-  },
-  {
-    "model": "news.readinghistory",
-    "pk": 2,
-    "fields": {
-      "user": 1,
-      "article": 7,
-      "read_at": "2026-03-15T20:30:00Z"
-    }
-  },
-  {
-    "model": "news.adpayment",
-    "pk": 1,
-    "fields": {
-      "advertiser": 1,
-      "ad_title": "Local Shop Promotion — Ahmedabad",
-      "plan": "Basic",
-      "payment_method": "UPI",
-      "amount": "500.00",
-      "status": "Completed",
-      "created_at": "2026-03-20T08:00:00Z"
-    }
-  },
-  {
-    "model": "news.adpayment",
-    "pk": 2,
-    "fields": {
-      "advertiser": 1,
-      "ad_title": "Tech Expo Gujarat 2026",
-      "plan": "Premium",
-      "payment_method": "Card",
-      "amount": "5000.00",
-      "status": "Completed",
-      "created_at": "2026-03-18T09:00:00Z"
+      "title": "Breaking: Traffic Jam in Mumbai",
+      "content": "Severe traffic congestion reported in city.",
+      "category": "Live",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "author": 1,
+      "views_count": 870,
+      "created_at": "2026-01-20T10:00:00Z",
+      "updated_at": "2026-01-20T10:00:00Z"
     }
   }
 ]

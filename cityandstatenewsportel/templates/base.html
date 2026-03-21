@@ -15,12 +15,13 @@
 <div class="mobile-menu" id="mobileMenu">
   <button class="mobile-menu-close" onclick="closeMobileMenu()"><i class="fas fa-xmark"></i></button>
   <a href="{% url 'home' %}"><i class="fas fa-house fa-fw"></i> Home</a>
-  <a href="#"><i class="fas fa-city fa-fw"></i> City News</a>
-  <a href="#"><i class="fas fa-map fa-fw"></i> State News</a>
-  <a href="#"><i class="fas fa-landmark fa-fw"></i> Politics</a>
-  <a href="#"><i class="fas fa-trophy fa-fw"></i> Sports</a>
-  <a href="#"><i class="fas fa-briefcase fa-fw"></i> Jobs</a>
-  <a href="#"><i class="fas fa-calendar fa-fw"></i> Events</a>
+  <a href="{% url 'category' 'Politics' %}"><i class="fas fa-landmark fa-fw"></i> Politics</a>
+  <a href="{% url 'category' 'Sports' %}"><i class="fas fa-trophy fa-fw"></i> Sports</a>
+  <a href="{% url 'category' 'Jobs' %}"><i class="fas fa-briefcase fa-fw"></i> Jobs</a>
+  <a href="{% url 'category' 'Events' %}"><i class="fas fa-calendar fa-fw"></i> Events</a>
+  <a href="{% url 'category' 'Business' %}"><i class="fas fa-chart-line fa-fw"></i> Business</a>
+  <a href="{% url 'category' 'Education' %}"><i class="fas fa-graduation-cap fa-fw"></i> Education</a>
+  <a href="{% url 'live_news' %}"><i class="fas fa-satellite-dish fa-fw"></i> Live News</a>
   <hr style="border-color:rgba(255,255,255,.12);margin:1rem 0;">
   {% if request.user.is_authenticated %}
     {% if request.user.role == 'owner' %}
@@ -105,15 +106,15 @@
 <div class="cat-bar">
   <div class="cat-bar-inner">
     <a href="{% url 'home' %}" class="cat-link {% block cat_home %}{% endblock %}">🏠 Home</a>
-    <a href="#" class="cat-link {% block cat_city %}{% endblock %}">🏙️ City</a>
-    <a href="#" class="cat-link {% block cat_state %}{% endblock %}">🗺️ State</a>
-    <a href="#" class="cat-link">🏛️ Politics</a>
-    <a href="#" class="cat-link">🏏 Sports</a>
-    <a href="#" class="cat-link">💼 Jobs</a>
-    <a href="#" class="cat-link">📅 Events</a>
-    <a href="#" class="cat-link">📈 Business</a>
-    <a href="#" class="cat-link">🎓 Education</a>
-    <a href="#" class="cat-link highlight">🔥 Trending</a>
+    <a href="{% url 'all_city_news' %}" class="cat-link {% block cat_city %}{% endblock %}">🏙️ City</a>
+    <a href="{% url 'all_state_news' %}" class="cat-link {% block cat_state %}{% endblock %}">🗺️ State</a>
+    <a href="{% url 'category' 'Politics' %}"     class="cat-link {% block cat_politics %}{% endblock %}">🏛️ Politics</a>
+    <a href="{% url 'category' 'Sports' %}"       class="cat-link {% block cat_sports %}{% endblock %}">🏏 Sports</a>
+    <a href="{% url 'category' 'Jobs' %}"         class="cat-link {% block cat_jobs %}{% endblock %}">💼 Jobs</a>
+    <a href="{% url 'category' 'Events' %}"       class="cat-link {% block cat_events %}{% endblock %}">📅 Events</a>
+    <a href="{% url 'category' 'Business' %}"     class="cat-link {% block cat_business %}{% endblock %}">📈 Business</a>
+    <a href="{% url 'category' 'Education' %}"    class="cat-link {% block cat_education %}{% endblock %}">🎓 Education</a>
+    <a href="{% url 'category' 'Trending' %}"     class="cat-link highlight {% block cat_trending %}{% endblock %}">🔥 Trending</a>
     <a href="{% url 'live_news' %}" class="cat-link" style="color:var(--red);font-weight:700;">📡 Live</a>
   </div>
 </div>

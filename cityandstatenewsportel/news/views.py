@@ -301,12 +301,26 @@ def manage_articles(request):
     page_number = request.GET.get('page', 1)
     page_obj    = paginator.get_page(page_number)
 
+    # Sort pinned articles to top on page 1
+    pinned_ids = request.session.get('pinned_articles', [])
+    articles_list = list(page_obj)
+    if pinned_ids and int(page_number) == 1:
+        pinned = [a for a in articles_list if a.id in pinned_ids]
+        rest   = [a for a in articles_list if a.id not in pinned_ids]
+        articles_list = pinned + rest
+
     # trending threshold: top 20% by views
     trending_threshold = 10
 
+    bookmarked_ids = set()
+    if request.user.is_authenticated:
+        bookmarked_ids = set(Bookmark.objects.filter(user=request.user).values_list('article_id', flat=True))
+
     context = {
         'page_obj':          page_obj,
-        'articles':          page_obj,
+        'articles':          articles_list,
+        'pinned_ids':        pinned_ids,
+        'bookmarked_ids':    bookmarked_ids,
         'total_articles':    total_articles,
         'total_views':       total_views,
         'published_count':   published_count,
@@ -365,12 +379,157 @@ def admin_analytics_dashboard(request):
     return render(request, 'admin_analytics.html', context)
 
 @login_required
+def edit_article(request, article_id):
+    article = get_object_or_404(Article, id=article_id)
+
+    default_cats = ['Politics', 'Sports', 'Technology', 'Business', 'Entertainment', 'Education', 'Health', 'Crime', 'Weather', 'Jobs', 'Events']
+    db_cats = list(Article.objects.values_list('category', flat=True).distinct().exclude(category__isnull=True).exclude(category=''))
+    db_cats_lower = [c.lower() for c in db_cats]
+    for d in default_cats:
+        if d.lower() not in db_cats_lower:
+            db_cats.append(d)
+
+    cities = list(Article.objects.values_list('city', flat=True).distinct().exclude(city__isnull=True).exclude(city=''))
+    states = list(Article.objects.values_list('state', flat=True).distinct().exclude(state__isnull=True).exclude(state=''))
+    default_states = ['Gujarat', 'Maharashtra', 'Rajasthan', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Uttar Pradesh', 'West Bengal', 'Punjab', 'Madhya Pradesh']
+    states_lower = [s.lower() for s in states]
+    for s in default_states:
+        if s.lower() not in states_lower:
+            states.append(s)
+
+    if request.method == 'POST':
+        title    = request.POST.get('title', '').strip()
+        content  = request.POST.get('content', '').strip()
+        category = request.POST.get('category', '').strip()
+        city     = request.POST.get('city', '').strip()
+        state    = request.POST.get('state', '').strip()
+        if title and content:
+            article.title    = title
+            article.content  = content
+            article.category = category or None
+            article.city     = city or None
+            article.state    = state or None
+            article.save()
+            messages.success(request, 'Article updated successfully.')
+            return redirect('manage_articles')
+        else:
+            messages.error(request, 'Title and content are required.')
+
+    return render(request, 'edit_article.html', {
+        'article':    article,
+        'categories': db_cats,
+        'cities':     cities,
+        'states':     states,
+    })
+
+
+def pin_article(request, article_id):
+    """AJAX — toggle pinned state stored in session."""
+    if request.method == 'POST':
+        pinned = request.session.get('pinned_articles', [])
+        if article_id in pinned:
+            pinned.remove(article_id)
+            is_pinned = False
+        else:
+            pinned.insert(0, article_id)
+            is_pinned = True
+        request.session['pinned_articles'] = pinned
+        return JsonResponse({'pinned': is_pinned})
+    return JsonResponse({'error': 'POST required'}, status=405)
+
+
+@login_required
 def delete_article(request, article_id):
     article = get_object_or_404(Article, id=article_id)
     if request.method == 'POST':
         article.delete()
         messages.success(request, 'Article deleted successfully.')
     return redirect('manage_articles')
+
+
+def all_city_news(request):
+    """Landing page showing all articles grouped/filtered by city."""
+    from django.core.paginator import Paginator
+    city_filter = request.GET.get('city', '')
+    q           = request.GET.get('q', '').strip()
+
+    articles = Article.objects.filter(
+        city__isnull=False
+    ).exclude(city='').prefetch_related('media').order_by('-created_at')
+
+    if city_filter:
+        articles = articles.filter(city__iexact=city_filter)
+    if q:
+        articles = articles.filter(Q(title__icontains=q) | Q(content__icontains=q))
+
+    paginator = Paginator(articles, 9)
+    page_obj  = paginator.get_page(request.GET.get('page', 1))
+
+    cities = Article.objects.values_list('city', flat=True).distinct().exclude(city__isnull=True).exclude(city='').order_by('city')
+    states = Article.objects.values_list('state', flat=True).distinct().exclude(state__isnull=True).exclude(state='')
+
+    return render(request, 'all_city_news.html', {
+        'articles':     page_obj,
+        'cities':       cities,
+        'states':       states,
+        'city_filter':  city_filter,
+        'q':            q,
+        'total':        articles.count(),
+    })
+
+
+def all_state_news(request):
+    """Landing page showing all articles grouped/filtered by state."""
+    from django.core.paginator import Paginator
+    state_filter = request.GET.get('state', '')
+    q            = request.GET.get('q', '').strip()
+
+    articles = Article.objects.filter(
+        state__isnull=False
+    ).exclude(state='').prefetch_related('media').order_by('-created_at')
+
+    if state_filter:
+        articles = articles.filter(state__iexact=state_filter)
+    if q:
+        articles = articles.filter(Q(title__icontains=q) | Q(content__icontains=q))
+
+    paginator = Paginator(articles, 9)
+    page_obj  = paginator.get_page(request.GET.get('page', 1))
+
+    cities = Article.objects.values_list('city', flat=True).distinct().exclude(city__isnull=True).exclude(city='')
+    states = Article.objects.values_list('state', flat=True).distinct().exclude(state__isnull=True).exclude(state='').order_by('state')
+
+    return render(request, 'all_state_news.html', {
+        'articles':     page_obj,
+        'states':       states,
+        'cities':       cities,
+        'state_filter': state_filter,
+        'q':            q,
+        'total':        articles.count(),
+    })
+
+
+def category_view(request, category_name):
+    from django.core.paginator import Paginator
+
+    articles = Article.objects.filter(
+        category__iexact=category_name
+    ).prefetch_related('media').order_by('-views_count', '-created_at')
+
+    total     = articles.count()
+    paginator = Paginator(articles, 9)
+    page_obj  = paginator.get_page(request.GET.get('page', 1))
+
+    cities = Article.objects.values_list('city',  flat=True).distinct().exclude(city__isnull=True).exclude(city='')
+    states = Article.objects.values_list('state', flat=True).distinct().exclude(state__isnull=True).exclude(state='')
+
+    return render(request, 'category.html', {
+        'articles':      page_obj,
+        'category_name': category_name,
+        'total':         total,
+        'cities':        cities,
+        'states':        states,
+    })
 
 
 @login_required
@@ -394,7 +553,9 @@ def bookmark_article(request, article_id):
     bookmark, created = Bookmark.objects.get_or_create(user=request.user, article=article)
     if not created:
         bookmark.delete()
-        messages.success(request, 'Article removed from bookmarks.')
+        bookmarked = False
     else:
-        messages.success(request, 'Article bookmarked successfully.')
+        bookmarked = True
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.method == 'POST':
+        return JsonResponse({'bookmarked': bookmarked})
     return redirect('user_dashboard')

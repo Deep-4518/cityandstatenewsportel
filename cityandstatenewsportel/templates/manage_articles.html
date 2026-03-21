@@ -109,7 +109,8 @@ thead th {
 tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
 tbody tr:hover { background: var(--bg); }
 tbody tr:last-child { border-bottom: none; }
-td { padding: .85rem 1rem; font-size: .85rem; color: var(--text); vertical-align: middle; }
+td { padding: .6rem 1rem; font-size: .85rem; color: var(--text); vertical-align: middle; }
+td.td-actions { padding: .5rem .75rem; vertical-align: middle; }
 
 /* ── Thumb ── */
 .art-thumb {
@@ -119,6 +120,10 @@ td { padding: .85rem 1rem; font-size: .85rem; color: var(--text); vertical-align
   color: var(--text-faint); font-size: 1.1rem;
 }
 .art-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.art-cell { display: flex; align-items: center; gap: .75rem; }
+.art-cell-text { min-width: 0; }
+.art-cell-title { font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: .2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+.art-cell-excerpt { font-size: .75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
 
 /* ── Badges ── */
 .cat-badge {
@@ -148,20 +153,28 @@ td { padding: .85rem 1rem; font-size: .85rem; color: var(--text); vertical-align
 }
 
 /* ── Action Buttons ── */
-.act-btn {
-  width: 30px; height: 30px; border-radius: var(--radius-sm);
-  display: inline-flex; align-items: center; justify-content: center;
-  border: none; cursor: pointer; font-size: .8rem;
-  transition: background .15s, color .15s; text-decoration: none;
-  background: var(--bg); color: var(--text-muted);
+.act-group {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 3px;
 }
-.act-btn:hover { transform: none; }
-.act-btn.view   { background: rgba(14,165,233,.1); color: #0ea5e9; }
-.act-btn.edit   { background: rgba(245,158,11,.1); color: #d97706; }
-.act-btn.delete { background: rgba(230,57,70,.1);  color: var(--red); }
-.act-btn.view:hover   { background: rgba(14,165,233,.2); }
-.act-btn.edit:hover   { background: rgba(245,158,11,.2); }
-.act-btn.delete:hover { background: rgba(230,57,70,.2); }
+.act-row { display: flex; gap: 3px; align-items: center; justify-content: center; }
+.act-row + .act-row { border-top: 1px solid var(--border); padding-top: 3px; }
+.act-btn {
+  width: 28px; height: 28px;
+  min-width: 28px; max-width: 28px;
+  border-radius: var(--radius-sm);
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer; font-size: .75rem;
+  transition: background .15s, color .15s, transform .1s; text-decoration: none;
+  flex-shrink: 0; padding: 0; margin: 0; line-height: 1; box-sizing: border-box;
+  font-weight: normal; letter-spacing: 0;
+}
+.act-btn:hover { transform: translateY(-1px); }
+.act-btn.view   { background: rgba(14,165,233,.12); color: #0ea5e9; }
+.act-btn.edit   { background: rgba(245,158,11,.12); color: #d97706; }
+.act-btn.delete { background: rgba(230,57,70,.12);  color: var(--red); }
+.act-btn.view:hover   { background: rgba(14,165,233,.25); color: #0ea5e9; }
+.act-btn.edit:hover   { background: rgba(245,158,11,.25); color: #d97706; }
+.act-btn.delete:hover { background: rgba(230,57,70,.25);  color: var(--red); }
 
 /* ── Author chip ── */
 .author-chip {
@@ -197,6 +210,19 @@ td { padding: .85rem 1rem; font-size: .85rem; color: var(--text); vertical-align
 }
 .pg-btn:hover { border-color: var(--red); color: var(--red); }
 .pg-btn.active { background: var(--red); color: #fff; border-color: var(--red); }
+
+/* Bookmark */
+.bm-btn        { background: rgba(245,158,11,.1); color: #d97706; }
+.bm-btn:hover  { background: rgba(245,158,11,.2); color: #b45309; }
+.bm-active     { background: #d97706; color: #fff; }
+.bm-active:hover { background: #b45309; color: #fff; }
+/* Pin */
+.pin-btn       { background: rgba(13,27,42,.08); color: var(--navy); }
+.pin-btn:hover { background: rgba(13,27,42,.15); color: var(--navy); }
+.pin-active    { background: var(--red);      color: #fff; }
+.pin-active:hover { background: var(--red-dark); color: #fff; }
+tr.pinned-row { background: rgba(230,57,70,.04) !important; }
+tr.pinned-row td:first-child { border-left: 3px solid var(--red); }
 
 /* ── Delete Modal ── */
 #deleteModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9999; align-items: center; justify-content: center; padding: 1rem; }
@@ -324,7 +350,7 @@ td { padding: .85rem 1rem; font-size: .85rem; color: var(--text); vertical-align
   <!-- TABLE -->
   <div class="ma-table-card">
     <div class="ma-table-top">
-      <span>Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> articles</span>
+      <!-- <span>Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> articles</span> -->
       {% if q %}<span style="background:rgba(230,57,70,.08);color:var(--red);padding:2px 10px;border-radius:99px;font-size:.75rem;font-weight:700;">Search: "{{ q }}"</span>{% endif %}
     </div>
 
@@ -340,29 +366,29 @@ td { padding: .85rem 1rem; font-size: .85rem; color: var(--text); vertical-align
             <th class="desktop-only">Date</th>
             <th style="text-align:center;">Views</th>
             <th style="text-align:center;">Status</th>
-            <th style="text-align:center;">Actions</th>
+            <th style="text-align:center;min-width:110px;">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {% for article in page_obj %}
-          <tr>
+          {% for article in articles %}
+          <tr id="row-{{ article.id }}" {% if article.id in pinned_ids %}class="pinned-row"{% endif %}>
             <td style="color:var(--text-muted);font-size:.75rem;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
             <td>
-              <div style="display:flex;align-items:center;gap:.75rem;">
+              <div class="art-cell">
                 <div class="art-thumb">
                   {% with article.media.first as m %}
                     {% if m and m.media_upload %}<img src="{{ m.media_upload.url }}" alt="">
                     {% else %}<i class="fas fa-image"></i>{% endif %}
                   {% endwith %}
                 </div>
-                <div>
-                  <div style="font-weight:700;color:var(--text);line-height:1.3;margin-bottom:.2rem;">
+                <div class="art-cell-text">
+                  <div class="art-cell-title">
                     {{ article.title|truncatechars:48 }}
                     {% if article.views_count >= trending_threshold %}
                     <span class="trend-badge"><i class="fas fa-arrow-trend-up"></i> Trending</span>
                     {% endif %}
                   </div>
-                  <div style="font-size:.75rem;color:var(--text-muted);">{{ article.content|truncatechars:70 }}</div>
+                  <div class="art-cell-excerpt">{{ article.content|truncatechars:60 }}</div>
                 </div>
               </div>
             </td>
@@ -391,13 +417,17 @@ td { padding: .85rem 1rem; font-size: .85rem; color: var(--text); vertical-align
                 <span class="status-draft">Draft</span>
               {% endif %}
             </td>
-            <td style="text-align:center;">
-              <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;">
-                <a href="{% url 'article_detail' article.id %}" class="act-btn view" title="View"><i class="fas fa-eye"></i></a>
-                <a href="{% url 'add_article' %}" class="act-btn edit" title="Edit"><i class="fas fa-pen"></i></a>
-                <a href="{% url 'bookmark_article' article.id %}" class="act-btn" title="Bookmark" style="background:rgba(245,158,11,.1);color:#d97706;"><i class="fas fa-bookmark"></i></a>
-                <button class="act-btn" title="Pin" style="background:rgba(29,78,216,.1);color:var(--blue);" onclick="pinArticle({{ article.id }}, this)"><i class="fas fa-thumbtack"></i></button>
-                <button onclick="openDeleteModal({{ article.id }}, '{{ article.title|escapejs }}')" class="act-btn delete" title="Delete"><i class="fas fa-trash"></i></button>
+            <td class="td-actions">
+              <div class="act-group">
+                <div class="act-row">
+                  <a href="{% url 'article_detail' article.id %}" class="act-btn view" title="View"><i class="fas fa-eye"></i></a>
+                  <a href="{% url 'edit_article' article.id %}" class="act-btn edit" title="Edit"><i class="fas fa-pen"></i></a>
+                  <button onclick="toggleBookmark({{ article.id }}, this)" class="act-btn bm-btn {% if article.id in bookmarked_ids %}bm-active{% endif %}" title="Bookmark"><i class="fas fa-bookmark"></i></button>
+                </div>
+                <div class="act-row">
+                  <button onclick="togglePin({{ article.id }}, this)" class="act-btn pin-btn {% if article.id in pinned_ids %}pin-active{% endif %}" title="{% if article.id in pinned_ids %}Unpin{% else %}Pin{% endif %}"><i class="fas fa-thumbtack"></i></button>
+                  <button onclick="openDeleteModal({{ article.id }}, '{{ article.title|escapejs }}')" class="act-btn delete" title="Delete"><i class="fas fa-trash"></i></button>
+                </div>
               </div>
             </td>
           </tr>
@@ -445,6 +475,15 @@ td { padding: .85rem 1rem; font-size: .85rem; color: var(--text); vertical-align
 </div>
 
 <script>
+const CSRF = '{{ csrf_token }}';
+
+// Store original row order on page load
+const tbody = document.querySelector('tbody');
+const originalOrder = {};
+Array.from(tbody.querySelectorAll('tr[id^="row-"]')).forEach((row, idx) => {
+  originalOrder[row.id] = idx;
+});
+
 function openDeleteModal(id, title) {
   document.getElementById('deleteModalMsg').textContent = 'Delete "' + title + '"? This cannot be undone.';
   document.getElementById('deleteForm').action = '/news/delete-article/' + id + '/';
@@ -456,11 +495,39 @@ function closeDeleteModal() {
 document.getElementById('deleteModal').addEventListener('click', function(e) {
   if (e.target === this) closeDeleteModal();
 });
-function pinArticle(id, btn) {
-  btn.style.background = 'rgba(230,57,70,.15)';
-  btn.style.color = 'var(--red)';
-  btn.title = 'Pinned';
-  btn.querySelector('i').className = 'fas fa-thumbtack';
+
+function toggleBookmark(id, btn) {
+  fetch('/news/bookmark/' + id + '/', { method: 'POST', headers: {'X-CSRFToken': CSRF} })
+    .then(r => r.json()).then(() => {
+      btn.classList.toggle('bm-active');
+    }).catch(() => { btn.classList.toggle('bm-active'); });
+}
+
+function togglePin(id, btn) {
+  fetch('/news/pin-article/' + id + '/', { method: 'POST', headers: {'X-CSRFToken': CSRF} })
+    .then(r => r.json()).then(data => {
+      const row = document.getElementById('row-' + id);
+      if (data.pinned) {
+        btn.classList.add('pin-active');
+        btn.title = 'Unpin';
+        row.classList.add('pinned-row');
+        tbody.insertBefore(row, tbody.firstChild);
+      } else {
+        btn.classList.remove('pin-active');
+        btn.title = 'Pin';
+        row.classList.remove('pinned-row');
+        // Restore to original position
+        const targetIdx = originalOrder[row.id];
+        const rows = Array.from(tbody.querySelectorAll('tr[id^="row-"]'));
+        // Find the first row whose original index is greater than targetIdx
+        const after = rows.find(r => r !== row && originalOrder[r.id] > targetIdx);
+        if (after) {
+          tbody.insertBefore(row, after);
+        } else {
+          tbody.appendChild(row);
+        }
+      }
+    });
 }
 </script>
 {% endblock %}
