@@ -60,7 +60,7 @@
     </a>
 
     <!-- Center Search -->
-    <form method="get" action="{% url 'home' %}" class="header-search">
+    <form method="get" action="{% url 'search_articles' %}" class="header-search">
       <input type="text" name="q" placeholder="Search news, cities, topics…" autocomplete="off">
       <button type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
     </form>
@@ -213,15 +213,19 @@ const themeBtn = document.getElementById('theme-toggle');
 const themeIcon = document.getElementById('theme-icon');
 function applyTheme(t) {
   html.setAttribute('data-theme', t);
-  themeIcon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-  themeIcon.style.fontSize = '.9rem';
+  if (themeIcon) {
+    themeIcon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    themeIcon.style.fontSize = '.9rem';
+  }
 }
 applyTheme(localStorage.getItem('theme') || 'light');
-themeBtn.addEventListener('click', () => {
-  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('theme', next);
-  applyTheme(next);
-});
+if (themeBtn) {
+  themeBtn.addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', next);
+    applyTheme(next);
+  });
+}
 
 // ── Header scroll shrink ──
 window.addEventListener('scroll', () => {

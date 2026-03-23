@@ -232,6 +232,7 @@ def add_article(request):
         if title and content:
             author = request.user if request.user.is_authenticated else None
             if author:
+                action = request.POST.get('action', 'draft')
                 Article.objects.create(
                     title=title,
                     content=content,
@@ -239,8 +240,12 @@ def add_article(request):
                     city=city or None,
                     state=state or None,
                     author=author,
+                    is_published=(action == 'publish'),
                 )
-                messages.success(request, 'Article published successfully.')
+                if action == 'publish':
+                    messages.success(request, 'Article published successfully.')
+                else:
+                    messages.success(request, 'Article saved as draft.')
                 return redirect('manage_articles')
             else:
                 messages.error(request, 'You must be logged in to publish an article.')
@@ -277,11 +282,11 @@ def manage_articles(request):
         qs = qs.filter(Q(title__icontains=q) | Q(content__icontains=q))
     if category:
         qs = qs.filter(category__icontains=category)
-    # Article model has no status field yet — treat views_count==0 as Draft proxy
+    # Article status based on is_published field
     if status == 'published':
-        qs = qs.filter(views_count__gt=0)
+        qs = qs.filter(is_published=True)
     elif status == 'draft':
-        qs = qs.filter(views_count=0)
+        qs = qs.filter(is_published=False)
 
     sort_map = {
         'latest': '-created_at',
@@ -293,8 +298,8 @@ def manage_articles(request):
 
     total_articles  = Article.objects.count()
     total_views     = Article.objects.aggregate(tv=Sum('views_count'))['tv'] or 0
-    published_count = Article.objects.filter(views_count__gt=0).count()
-    draft_count     = Article.objects.filter(views_count=0).count()
+    published_count = Article.objects.filter(is_published=True).count()
+    draft_count     = Article.objects.filter(is_published=False).count()
     categories      = Article.objects.values_list('category', flat=True).distinct().exclude(category__isnull=True)
 
     paginator   = Paginator(qs, 10)
@@ -475,6 +480,36 @@ def all_city_news(request):
         'city_filter':  city_filter,
         'q':            q,
         'total':        articles.count(),
+    })
+
+
+def search_articles(request):
+    from django.core.paginator import Paginator
+    query = request.GET.get('q', '').strip()
+    results = Article.objects.none()
+
+    if query:
+        results = Article.objects.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(category__icontains=query)
+        ).prefetch_related('media').order_by('-created_at')
+
+    total = results.count()
+    paginator = Paginator(results, 10)
+    page_obj  = paginator.get_page(request.GET.get('page', 1))
+
+    cities = Article.objects.values_list('city', flat=True).distinct().exclude(city__isnull=True).exclude(city='')
+    states = Article.objects.values_list('state', flat=True).distinct().exclude(state__isnull=True).exclude(state='')
+
+    return render(request, 'search_results.html', {
+        'query':    query,
+        'results':  results,
+        'q':        query,
+        'page_obj': page_obj,
+        'total':    total,
+        'cities':   cities,
+        'states':   states,
     })
 
 

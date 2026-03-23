@@ -4,7 +4,7 @@ from .views import (owner_dashboard, user_dashboard, add_article, add_payment,
                     analytics, admin_analytics_dashboard,
                     report_fake_news, bookmark_article, reader_search,
                     live_news, live_news_api, category_view,
-                    all_city_news, all_state_news)
+                    all_city_news, all_state_news, search_articles)
 
 urlpatterns = [
     path('owner/', owner_dashboard, name='owner_dashboard'),
@@ -20,6 +20,7 @@ urlpatterns = [
     path('report-fake-news/<int:article_id>/', report_fake_news, name='report_fake_news'),
     path('bookmark/<int:article_id>/', bookmark_article, name='bookmark_article'),
     path('search/', reader_search, name='reader_search'),
+    path('search-results/', search_articles, name='search_articles'),
     path('live/', live_news, name='live_news'),
     path('live/api/', live_news_api, name='live_news_api'),
     path('category/<str:category_name>/', category_view, name='category'),

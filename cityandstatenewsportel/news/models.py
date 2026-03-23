@@ -12,6 +12,7 @@ class Article(models.Model):
     state = models.CharField(max_length=100, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     views_count = models.PositiveIntegerField(default=0)
+    is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

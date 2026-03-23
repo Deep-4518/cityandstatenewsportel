@@ -388,7 +388,7 @@ tr.pinned-row td:first-child { border-left: 3px solid var(--red); }
                     <span class="trend-badge"><i class="fas fa-arrow-trend-up"></i> Trending</span>
                     {% endif %}
                   </div>
-                  <div class="art-cell-excerpt">{{ article.content|truncatechars:60 }}</div>
+                  <div class="art-cell-excerpt">{{ article.content|striptags|truncatechars:60 }}</div>
                 </div>
               </div>
             </td>
@@ -411,7 +411,7 @@ tr.pinned-row td:first-child { border-left: 3px solid var(--red); }
             </td>
             <td style="text-align:center;font-size:.8rem;font-weight:700;">{{ article.views_count }}</td>
             <td style="text-align:center;">
-              {% if article.views_count > 0 %}
+              {% if article.is_published %}
                 <span class="status-pub">Published</span>
               {% else %}
                 <span class="status-draft">Draft</span>

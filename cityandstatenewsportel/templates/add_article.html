@@ -262,7 +262,7 @@
         {% endfor %}
       {% endif %}
 
-      <form action="{% url 'add_article' %}" method="POST">
+      <form id="article-form" action="{% url 'add_article' %}" method="POST">
         {% csrf_token %}
 
         <!-- Title -->
@@ -404,8 +404,10 @@ const quill = new Quill('#quill-editor', {
 });
 
 // On form submit, copy Quill HTML into hidden input
-document.querySelector('form').addEventListener('submit', function() {
-  document.getElementById('content-input').value = quill.root.innerHTML;
+document.getElementById('article-form').addEventListener('submit', function() {
+  const html = quill.root.innerHTML;
+  // treat blank editor as empty
+  document.getElementById('content-input').value = (html === '<p><br></p>') ? '' : html;
 });
 
 // Dropdown helpers

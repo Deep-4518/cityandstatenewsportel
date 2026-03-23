@@ -100,7 +100,7 @@
         {% endfor %}
       {% endif %}
 
-      <form action="{% url 'edit_article' article.id %}" method="POST">
+      <form id="article-form" action="{% url 'edit_article' article.id %}" method="POST">
         {% csrf_token %}
 
         <div class="aa-field">
@@ -215,8 +215,9 @@ const quill = new Quill('#quill-editor', {
 // Pre-fill existing content
 quill.root.innerHTML = `{{ article.content|escapejs }}`;
 
-document.querySelector('form').addEventListener('submit', function() {
-  document.getElementById('content-input').value = quill.root.innerHTML;
+document.getElementById('article-form').addEventListener('submit', function() {
+  const html = quill.root.innerHTML;
+  document.getElementById('content-input').value = (html === '<p><br></p>') ? '' : html;
 });
 
 function showDD(key) { filterDD(key, document.getElementById(key+'-input').value); }
