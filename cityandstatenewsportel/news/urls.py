@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import RedirectView
 from .views import (owner_dashboard, user_dashboard, add_article, add_payment,
                     manage_articles, delete_article, edit_article, pin_article,
                     analytics, admin_analytics_dashboard,
@@ -9,6 +10,11 @@ from .views import (owner_dashboard, user_dashboard, add_article, add_payment,
 urlpatterns = [
     path('owner/', owner_dashboard, name='owner_dashboard'),
     path('user/', user_dashboard, name='user_dashboard'),
+
+    # Redirects for old/mistyped URLs
+    path('owner_dashboard/', RedirectView.as_view(pattern_name='owner_dashboard', permanent=False)),
+    path('user_dashboard/',  RedirectView.as_view(pattern_name='user_dashboard',  permanent=False)),
+
     path('add-article/', add_article, name='add_article'),
     path('edit-article/<int:article_id>/', edit_article, name='edit_article'),
     path('pin-article/<int:article_id>/', pin_article, name='pin_article'),
