@@ -504,21 +504,25 @@ form button:not(.act-btn):not(.del-cancel):not(.del-confirm):not(.ma-filter-btn)
 
 /* ── Language Toggle ── */
 .lang-toggle {
-  margin-left: auto; display: flex; gap: 4px; flex-shrink: 0;
+  margin-left: auto; flex-shrink: 0;
 }
-.lang-btn {
-  background: var(--bg); color: var(--text-muted);
-  border: 1px solid var(--border); padding: 3px 10px;
-  border-radius: 4px; font-size: .72rem; font-weight: 700;
-  cursor: pointer; margin: 0; width: auto;
-  transition: background .2s, color .2s;
-  font-family: var(--font-sans);
+.lang-select {
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--border); padding: 4px 28px 4px 10px;
+  border-radius: var(--radius-sm); font-size: .78rem; font-weight: 600;
+  cursor: pointer; font-family: var(--font-sans);
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: border-color .2s, box-shadow .2s;
+  min-width: 100px;
 }
-.lang-btn:hover { background: var(--border); color: var(--text); transform: none; }
-.lang-btn.lang-btn-active {
-  background: var(--red); color: #fff; border-color: var(--red);
+.lang-select:focus {
+  outline: none; border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(230,57,70,.1);
 }
-.lang-btn.lang-btn-active:hover { background: var(--red-dark); transform: none; }
+.lang-select:hover { border-color: var(--border-dark); }
 
 /* ══════════════════════════════════════════
    RESPONSIVE

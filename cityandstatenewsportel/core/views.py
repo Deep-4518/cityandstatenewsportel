@@ -49,10 +49,52 @@ def home_view(request):
 # ── City Page ──────────────────────────────────────────────────────────────────
 def city_view(request, city_name):
     from news.models import Article
-    articles = Article.objects.filter(city__iexact=city_name).prefetch_related('media').order_by('-created_at')
-    cities   = Article.objects.values_list('city', flat=True).distinct().exclude(city__isnull=True).exclude(city='')
-    context  = {'articles': articles, 'city_name': city_name, 'cities': cities}
+    from .wiki import get_city_info, get_trending_cities_info
+
+    articles  = Article.objects.filter(city__iexact=city_name).prefetch_related('media').order_by('-created_at')
+    cities    = list(Article.objects.values_list('city', flat=True)
+                     .distinct().exclude(city__isnull=True).exclude(city='').order_by('city'))
+
+    # Top 5 cities by article count for trending section
+    from django.db.models import Count
+    trending_cities = list(
+        Article.objects.exclude(city__isnull=True).exclude(city='')
+        .values('city').annotate(cnt=Count('id')).order_by('-cnt')[:5]
+        .values_list('city', flat=True)
+    )
+    trending_info = get_trending_cities_info(trending_cities)
+
+    city_info = get_city_info(city_name)
+
+    context = {
+        'articles':       articles,
+        'city_name':      city_name,
+        'cities':         cities,
+        'wiki':           city_info.get('wiki'),
+        'wikidata':       city_info.get('wikidata'),
+        'trending_info':  trending_info,
+    }
     return render(request, 'core/city_news.html', context)
+
+
+# ── AJAX: Wikipedia city search ────────────────────────────────────────────────
+def wiki_city_search(request):
+    """AJAX endpoint — search Wikipedia for a city and return JSON."""
+    from django.http import JsonResponse
+    from .wiki import get_wiki_summary, search_wikipedia
+
+    q = request.GET.get('q', '').strip()
+    if not q:
+        return JsonResponse({'results': []})
+
+    # First try exact summary
+    summary = get_wiki_summary(q)
+    if summary:
+        return JsonResponse({'results': [summary], 'exact': True})
+
+    # Fall back to search
+    results = search_wikipedia(q, limit=5)
+    return JsonResponse({'results': results, 'exact': False})
 
 
 # ── State Page ─────────────────────────────────────────────────────────────────

@@ -33,13 +33,13 @@
     <a href="{% url 'logout' %}"><i class="fas fa-right-from-bracket fa-fw"></i> Logout</a>
   {% else %}
     <a href="{% url 'login' %}"><i class="fas fa-right-to-bracket fa-fw"></i> Login</a>
-    <a href="{% url 'signup' %}"><i class="fas fa-user-plus fa-fw"></i> Subscribe</a>
+    <a href="{% url 'add_payment' %}"><i class="fas fa-user-plus fa-fw"></i> Subscribe</a>
   {% endif %}
 </div>
 
 <!-- ── BREAKING NEWS TICKER ── -->
 <div class="ticker-wrap">
-  <div class="ticker-label"><span style="color:#fff;font-size:.9rem;">🔴</span> Breaking</div>
+  <div class="ticker-label"><span style="color:#fff;font-size:.9rem;">🔴</span> <span data-t="breaking">Breaking</span></div>
   <div class="ticker" id="tickerTrack">
     <span class="ticker__item">📰 Market Surge: Global indices touch record highs.</span>
     <span class="ticker__item">🏙️ City Update: New smart transit system launched in Ahmedabad.</span>
@@ -70,15 +70,15 @@
       <div class="nav-links">
         {% if request.user.is_authenticated %}
           {% if request.user.role == 'owner' %}
-            <a href="{% url 'owner_dashboard' %}">Reporter</a>
-            <a href="{% url 'add_article' %}">+ Article</a>
+            <a href="{% url 'owner_dashboard' %}" data-t="reporter">Reporter</a>
+            <a href="{% url 'add_article' %}" data-t="add_article">+ Article</a>
           {% else %}
-            <a href="{% url 'user_dashboard' %}">My Feed</a>
+            <a href="{% url 'user_dashboard' %}" data-t="my_feed">My Feed</a>
           {% endif %}
-          <a href="{% url 'logout' %}" style="color:var(--text-light);">Logout</a>
+          <a href="{% url 'logout' %}" style="color:var(--text-light);" data-t="logout">Logout</a>
         {% else %}
-          <a href="{% url 'login' %}">Login</a>
-          <a href="{% url 'signup' %}" class="btn-subscribe">Subscribe</a>
+          <a href="{% url 'login' %}" data-t="login">Login</a>
+          <a href="{% url 'add_payment' %}" class="btn-subscribe" data-t="subscribe">Subscribe</a>
         {% endif %}
       </div>
 
@@ -105,31 +105,31 @@
 <!-- ── CATEGORY NAV ── -->
 <div class="cat-bar">
   <div class="cat-bar-inner">
-    <a href="{% url 'home' %}" class="cat-link {% block cat_home %}{% endblock %}">🏠 Home</a>
-    <a href="{% url 'all_city_news' %}" class="cat-link {% block cat_city %}{% endblock %}">🏙️ City</a>
-    <a href="{% url 'all_state_news' %}" class="cat-link {% block cat_state %}{% endblock %}">🗺️ State</a>
-    <a href="{% url 'category' 'Politics' %}"     class="cat-link {% block cat_politics %}{% endblock %}">🏛️ Politics</a>
-    <a href="{% url 'category' 'Sports' %}"       class="cat-link {% block cat_sports %}{% endblock %}">🏏 Sports</a>
-    <a href="{% url 'category' 'Jobs' %}"         class="cat-link {% block cat_jobs %}{% endblock %}">💼 Jobs</a>
-    <a href="{% url 'category' 'Events' %}"       class="cat-link {% block cat_events %}{% endblock %}">📅 Events</a>
-    <a href="{% url 'category' 'Business' %}"     class="cat-link {% block cat_business %}{% endblock %}">📈 Business</a>
-    <a href="{% url 'category' 'Education' %}"    class="cat-link {% block cat_education %}{% endblock %}">🎓 Education</a>
-    <a href="{% url 'category' 'Trending' %}"     class="cat-link highlight {% block cat_trending %}{% endblock %}">🔥 Trending</a>
-    <a href="{% url 'live_news' %}" class="cat-link" style="color:var(--red);font-weight:700;">📡 Live</a>
+    <a href="{% url 'home' %}" class="cat-link {% block cat_home %}{% endblock %}" data-t="cat_home">🏠 Home</a>
+    <a href="{% url 'all_city_news' %}" class="cat-link {% block cat_city %}{% endblock %}" data-t="cat_city">🏙️ City</a>
+    <a href="{% url 'all_state_news' %}" class="cat-link {% block cat_state %}{% endblock %}" data-t="cat_state">🗺️ State</a>
+    <a href="{% url 'category' 'Politics' %}"     class="cat-link {% block cat_politics %}{% endblock %}" data-t="cat_politics">🏛️ Politics</a>
+    <a href="{% url 'category' 'Sports' %}"       class="cat-link {% block cat_sports %}{% endblock %}" data-t="cat_sports">🏏 Sports</a>
+    <a href="{% url 'category' 'Jobs' %}"         class="cat-link {% block cat_jobs %}{% endblock %}" data-t="cat_jobs">💼 Jobs</a>
+    <a href="{% url 'category' 'Events' %}"       class="cat-link {% block cat_events %}{% endblock %}" data-t="cat_events">📅 Events</a>
+    <a href="{% url 'category' 'Business' %}"     class="cat-link {% block cat_business %}{% endblock %}" data-t="cat_business">📈 Business</a>
+    <a href="{% url 'category' 'Education' %}"    class="cat-link {% block cat_education %}{% endblock %}" data-t="cat_education">🎓 Education</a>
+    <a href="{% url 'category' 'Trending' %}"     class="cat-link highlight {% block cat_trending %}{% endblock %}" data-t="cat_trending">🔥 Trending</a>
+    <a href="{% url 'live_news' %}" class="cat-link" style="color:var(--red);font-weight:700;" data-t="cat_live">📡 Live</a>
   </div>
 </div>
 
 <!-- ── LOCATION BAR ── -->
 <div class="loc-bar">
   <div class="loc-bar-inner">
-    <span class="loc-label"><i class="fas fa-location-dot"></i> Location:</span>
+    <span class="loc-label"><i class="fas fa-location-dot"></i> <span data-t="location">Location</span>:</span>
     <select class="loc-select" id="citySelector" onchange="navigateCity(this.value)">
-      <option value="">Select City</option>
+      <option value="" data-t="select_city">Select City</option>
       {% block city_options %}{% endblock %}
     </select>
     <span class="loc-sep">|</span>
     <select class="loc-select" id="stateSelector" onchange="navigateState(this.value)">
-      <option value="">Select State</option>
+      <option value="" data-t="select_state">Select State</option>
       {% block state_options %}{% endblock %}
     </select>
     <span class="loc-sep">|</span>
@@ -138,8 +138,11 @@
       <span id="weatherText"></span>
     </div>
     <div class="lang-toggle">
-      <button onclick="setLang('en')" id="btn-en" class="lang-btn lang-btn-active">EN</button>
-      <button onclick="setLang('gu')" id="btn-gu" class="lang-btn">ગુ</button>
+      <select id="lang-select" class="lang-select" onchange="setLang(this.value)">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="gu">ગુજરાતી</option>
+      </select>
     </div>
   </div>
 </div>
@@ -242,11 +245,69 @@ function navigateCity(city)   { if (city) window.location.href = '/city/' + enco
 function navigateState(state) { if (state) window.location.href = '/state/' + encodeURIComponent(state) + '/'; }
 
 // ── Language toggle ──
+const TRANSLATIONS = {
+  en: {
+    breaking:'Breaking', location:'Location', select_city:'Select City', select_state:'Select State',
+    login:'Login', logout:'Logout', subscribe:'Subscribe', reporter:'Reporter',
+    add_article:'+ Article', my_feed:'My Feed',
+    cat_home:'🏠 Home', cat_city:'🏙️ City', cat_state:'🗺️ State',
+    cat_politics:'🏛️ Politics', cat_sports:'🏏 Sports', cat_jobs:'💼 Jobs',
+    cat_events:'📅 Events', cat_business:'📈 Business', cat_education:'🎓 Education',
+    cat_trending:'🔥 Trending', cat_live:'📡 Live',
+    search_placeholder:'Search news, cities, topics…',
+  },
+  gu: {
+    breaking:'બ્રેકિંગ', location:'સ્થાન', select_city:'શહેર પસંદ કરો', select_state:'રાજ્ય પસંદ કરો',
+    login:'લૉગ ઇન', logout:'લૉગ આઉટ', subscribe:'સબ્સ્ક્રાઇબ', reporter:'રિપોર્ટર',
+    add_article:'+ લેખ', my_feed:'મારો ફીડ',
+    cat_home:'🏠 હોમ', cat_city:'🏙️ શહેર', cat_state:'🗺️ રાજ્ય',
+    cat_politics:'🏛️ રાજકારણ', cat_sports:'🏏 રમત', cat_jobs:'💼 નોકરી',
+    cat_events:'📅 ઇવેન્ટ', cat_business:'📈 વ્યવસાય', cat_education:'🎓 શિક્ષણ',
+    cat_trending:'🔥 ટ્રેન્ડિંગ', cat_live:'📡 લાઇવ',
+    search_placeholder:'સમાચાર, શહેર, વિષય શોધો…',
+  },
+  hi: {
+    breaking:'ब्रेकिंग', location:'स्थान', select_city:'शहर चुनें', select_state:'राज्य चुनें',
+    login:'लॉग इन', logout:'लॉग आउट', subscribe:'सदस्यता लें', reporter:'रिपोर्टर',
+    add_article:'+ लेख', my_feed:'मेरा फ़ीड',
+    cat_home:'🏠 होम', cat_city:'🏙️ शहर', cat_state:'🗺️ राज्य',
+    cat_politics:'🏛️ राजनीति', cat_sports:'🏏 खेल', cat_jobs:'💼 नौकरी',
+    cat_events:'📅 इवेंट', cat_business:'📈 व्यापार', cat_education:'🎓 शिक्षा',
+    cat_trending:'🔥 ट्रेंडिंग', cat_live:'📡 लाइव',
+    search_placeholder:'समाचार, शहर, विषय खोजें…',
+  }
+};
+
 function setLang(lang) {
   localStorage.setItem('lang', lang);
-  document.getElementById('btn-en').classList.toggle('lang-btn-active', lang === 'en');
-  document.getElementById('btn-gu').classList.toggle('lang-btn-active', lang === 'gu');
+
+  // Sync dropdown value
+  const sel = document.getElementById('lang-select');
+  if (sel) sel.value = lang;
+
+  const t = TRANSLATIONS[lang] || TRANSLATIONS['en'];
+
+  // Translate all data-t elements
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.getAttribute('data-t');
+    if (t[key]) el.textContent = t[key];
+  });
+
+  // Translate search placeholder
+  const searchInput = document.querySelector('.header-search input');
+  if (searchInput && t.search_placeholder) searchInput.placeholder = t.search_placeholder;
+
+  // Translate select first options
+  const cityOpt = document.querySelector('#citySelector option[value=""]');
+  if (cityOpt && t.select_city) cityOpt.textContent = t.select_city;
+  const stateOpt = document.querySelector('#stateSelector option[value=""]');
+  if (stateOpt && t.select_state) stateOpt.textContent = t.select_state;
+
+  // Set html lang attribute
+  document.documentElement.lang = lang;
 }
+
+// Apply saved language on page load
 setLang(localStorage.getItem('lang') || 'en');
 
 // ── Weather widget (hidden — API unavailable) ──
